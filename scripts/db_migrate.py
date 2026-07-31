@@ -31,8 +31,7 @@ async def check_and_create_tables():
         print("Verification et creation des tables manquantes via SQLAlchemy...")
         await conn.run_sync(Base.metadata.create_all)
         
-        if not has_alembic:
-            
+
     await engine.dispose()
     return has_alembic
 
