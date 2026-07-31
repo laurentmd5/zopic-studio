@@ -47,6 +47,20 @@ services:
     volumes:
       - qdrant_data:/qdrant/storage
 
+  backend:
+    image: zopic-studio-backend:${DOCKER_IMAGE_TAG:-latest}
+    container_name: zopic_backend
+    restart: always
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+      - minio
+      - qdrant
+    env_file:
+      - .env
+
 volumes:
   postgres_data:
   redis_data:
