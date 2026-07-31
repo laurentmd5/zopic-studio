@@ -1,0 +1,18 @@
+[project]
+name = "worker_ai"
+version = "0.1.0"
+description = "Microservice IA pour ZoPic Studio (InsightFace + Qdrant)"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi[standard]>=0.115.0",
+    "arq>=0.28.0",
+    "insightface>=0.7.3",
+    "onnxruntime>=1.19.2",
+    "opencv-python-headless>=4.10.0",
+    "qdrant-client>=1.11.3",
+    "aioboto3>=13.1.1",
+    "python-multipart>=0.0.12",
+]
+
+[tool.uv]
+package = false

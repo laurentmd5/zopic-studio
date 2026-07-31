@@ -24,7 +24,9 @@ def health_check():
 from app.modules.auth.router import router as auth_router
 from app.modules.events.router import router as events_router
 from app.modules.storage.router import router as storage_router
+from app.modules.face_recognition.router import router as face_recognition_router
 
 app.include_router(auth_router)
 app.include_router(events_router)
 app.include_router(storage_router)
+app.include_router(face_recognition_router)

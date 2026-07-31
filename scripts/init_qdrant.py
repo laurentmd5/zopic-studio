@@ -9,6 +9,7 @@ from app.infrastructure.qdrant_client_wrapper import qdrant_client_wrapper
 async def init():
     print("Initialisation Qdrant...")
     try:
+        await qdrant_client_wrapper.create_collection_if_not_exists("faces", 512)
         collections = await qdrant_client_wrapper.client.get_collections()
         print(f"Connexion Qdrant OK. Collections existantes : {collections.collections}")
     except Exception as e:

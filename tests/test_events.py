@@ -22,6 +22,14 @@ async def test_add_photo():
     mock_db = AsyncMock()
     mock_photo = schemas.PhotoCreate(s3_object_key="originals/test.jpg")
     
+    # Mock db.execute().scalars().first() for Album fetch
+    mock_result = MagicMock()
+    mock_scalars = MagicMock()
+    mock_album = MagicMock(event_id=5)
+    mock_scalars.first.return_value = mock_album
+    mock_result.scalars.return_value = mock_scalars
+    mock_db.execute.return_value = mock_result
+
     # On mock create_pool pour ne pas dÃ©clencher Redis
     with patch('app.modules.events.service.create_pool', new_callable=AsyncMock) as mock_create_pool:
         mock_redis = AsyncMock()
@@ -36,11 +44,22 @@ async def test_add_photo():
         
         mock_db.add.assert_called_once()
         mock_db.commit.assert_awaited_once()
-        
-        # VÃ©rifie que le job a Ã©tÃ© mis en queue
-        mock_redis.enqueue_job.assert_awaited_once_with(
+
+        # VÃ©rifie que les jobs ont Ã©tÃ© mis en queue
+        assert mock_redis.enqueue_job.await_count == 2
+        # Verify call to generate_watermark
+        mock_redis.enqueue_job.assert_any_call(
             'generate_watermark',
             photo.id,
             photo.s3_object_key,
             photo.watermark_s3_key
+        )
+        # Verify call to extract_faces
+        mock_redis.enqueue_job.assert_any_call(
+            'extract_faces',
+            photo.id,
+            5, # event_id from mock_album
+            10, # album_id
+            photo.s3_object_key,
+            _queue_name='arq:ai_queue'
         )

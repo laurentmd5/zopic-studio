@@ -50,8 +50,11 @@ async def add_photo(db: AsyncSession, album_id: int, photo_data: schemas.PhotoCr
     db.add(db_photo)
     await db.commit()
     await db.refresh(db_photo)
+    # Fetch album to get event_id
+    album_result = await db.execute(select(Album).where(Album.id == album_id))
+    db_album = album_result.scalars().first()
     
-    # 2. DÃ©clencher la tÃ¢che asynchrone Arq
+    # 2. DÃ©clencher la tÃ¢che asynchrone Arq (Filigrane)
     redis = await create_pool(RedisSettings.from_dsn(settings.REDIS_URL))
     await redis.enqueue_job(
         'generate_watermark',
@@ -59,5 +62,16 @@ async def add_photo(db: AsyncSession, album_id: int, photo_data: schemas.PhotoCr
         db_photo.s3_object_key,
         db_photo.watermark_s3_key
     )
+    
+    # 3. DÃ©clencher la tÃ¢che d'extraction IA sur la queue spÃ©cifique
+    if db_album:
+        await redis.enqueue_job(
+            'extract_faces',
+            db_photo.id,
+            db_album.event_id,
+            album_id,
+            db_photo.s3_object_key,
+            _queue_name='arq:ai_queue'
+        )
     
     return db_photo

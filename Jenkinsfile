@@ -72,6 +72,7 @@ pipeline {
                         cp ${WORKSPACE}/${COMPOSE_FILE}              ${DEPLOY_PATH}/
                         cp ${WORKSPACE}/scripts/init_qdrant.py       ${DEPLOY_PATH}/scripts/
                         cp ${WORKSPACE}/scripts/db_migrate.py        ${DEPLOY_PATH}/scripts/
+                        cp -r ${WORKSPACE}/worker_ai                 ${DEPLOY_PATH}/
                     """
 
                     def envExists = sh(
@@ -98,7 +99,7 @@ pipeline {
                     cd ${DEPLOY_PATH}
                     export DOCKER_IMAGE_TAG=${DOCKER_IMAGE_TAG}
                     docker compose -f ${COMPOSE_FILE} down --remove-orphans || true
-                    docker compose -f ${COMPOSE_FILE} up -d --force-recreate
+                    docker compose -f ${COMPOSE_FILE} up -d --build --force-recreate
                 """
                 sleep(time: 20, unit: 'SECONDS')
             }
