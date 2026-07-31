@@ -13,6 +13,7 @@ from app.core.database import Base
 # Make sure models are imported so Base has them
 from app.modules.auth import models as auth_models
 from app.modules.events import models as events_models
+from app.modules.payments import models as payments_models
 
 async def check_and_create_tables():
     # Enforce asyncpg dialect for Alembic if not in URL

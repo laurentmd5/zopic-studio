@@ -13,6 +13,7 @@ from app.core.database import Base
 # IMPORTANT: Import all models here or ensure they are imported before Base.metadata is used
 from app.modules.auth import models as auth_models
 from app.modules.events import models as events_models
+from app.modules.payments import models as payments_models
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
