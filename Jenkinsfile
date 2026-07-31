@@ -41,6 +41,7 @@ pipeline {
                     sh 'curl -LsSf https://astral.sh/uv/install.sh | sh || true'
                     env.PATH = "${HOME}/.local/bin:${env.PATH}"
                     sh 'uv sync'
+                    sh 'cp .env.example .env'
                     sh 'uv run pytest tests/'
                 }
             }
