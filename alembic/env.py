@@ -11,8 +11,8 @@ from alembic import context
 from app.core.config import settings
 from app.core.database import Base
 # IMPORTANT: Import all models here or ensure they are imported before Base.metadata is used
-# from app.modules.auth.models import *
-# ...
+from app.modules.auth import models as auth_models
+from app.modules.events import models as events_models
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

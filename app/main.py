@@ -22,5 +22,9 @@ def health_check():
 
 # Routers
 from app.modules.auth.router import router as auth_router
-app.include_router(auth_router)
+from app.modules.events.router import router as events_router
+from app.modules.storage.router import router as storage_router
 
+app.include_router(auth_router)
+app.include_router(events_router)
+app.include_router(storage_router)
