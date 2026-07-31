@@ -13,7 +13,7 @@ from app.core.database import Base
 # Make sure models are imported so Base has them
 from app.modules.auth import models
 
-async def migrate():
+async def check_and_create_tables():
     # Enforce asyncpg dialect for Alembic if not in URL
     url = settings.DATABASE_URL
     if url.startswith("postgresql://"):
@@ -30,15 +30,20 @@ async def migrate():
         if not has_alembic:
             print("Premier deploiement : Creation des tables via SQLAlchemy...")
             await conn.run_sync(Base.metadata.create_all)
-            print("Stamping alembic head...")
-            alembic_cfg = Config("alembic.ini")
-            command.stamp(alembic_cfg, "head")
-        else:
-            print("Deploiements suivants : Execution de alembic upgrade head...")
-            alembic_cfg = Config("alembic.ini")
-            command.upgrade(alembic_cfg, "head")
-
+            
     await engine.dispose()
+    return has_alembic
+
+def main():
+    has_alembic = asyncio.run(check_and_create_tables())
+    
+    alembic_cfg = Config("alembic.ini")
+    if not has_alembic:
+        print("Stamping alembic head...")
+        command.stamp(alembic_cfg, "head")
+    else:
+        print("Deploiements suivants : Execution de alembic upgrade head...")
+        command.upgrade(alembic_cfg, "head")
 
 if __name__ == "__main__":
-    asyncio.run(migrate())
+    main()
