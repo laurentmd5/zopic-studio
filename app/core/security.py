@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta, timezone
-from jose import jwt, JWTError
+import jwt
+from jwt import PyJWTError as JWTError
 from app.core.config import settings
 from passlib.context import CryptContext
 
