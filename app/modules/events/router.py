@@ -25,10 +25,15 @@ async def read_events(skip: int = 0, limit: int = 100, db: AsyncSession = Depend
     return await service.get_events(db, skip=skip, limit=limit)
 
 @router.get("/{event_id}", response_model=schemas.EventResponse)
-async def read_event(event_id: int, db: AsyncSession = Depends(get_db)):
+async def read_event(event_id: int, access_code: str = None, db: AsyncSession = Depends(get_db)):
     event = await service.get_event(db, event_id)
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
+    
+    if not event.is_public:
+        if not event.access_code or event.access_code != access_code:
+            raise HTTPException(status_code=403, detail="Code d'accès invalide ou manquant")
+            
     return event
 
 @router.post("/{event_id}/albums", response_model=schemas.AlbumResponse)

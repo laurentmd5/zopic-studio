@@ -21,7 +21,7 @@ async def create_event(db: AsyncSession, event_data: schemas.EventCreate, user_i
     return db_event
 
 async def get_events(db: AsyncSession, skip: int = 0, limit: int = 100):
-    result = await db.execute(select(Event).offset(skip).limit(limit))
+    result = await db.execute(select(Event).where(Event.is_public == True).offset(skip).limit(limit))
     return result.scalars().all()
 
 async def get_event(db: AsyncSession, event_id: int):
