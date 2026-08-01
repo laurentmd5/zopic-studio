@@ -3,17 +3,20 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Dict, Any
 
 from app.core.database import get_db
-from app.modules.auth.service import get_current_user_optional
 from app.modules.auth.models import User
 from app.modules.payments.schemas import OrderCreate, OrderResponse, PaydunyaWebhook
 from app.modules.payments import service
 
 router = APIRouter(prefix="/payments", tags=["Payments"])
 
+async def get_current_user_optional() -> User | None:
+    # Mock user for MVP, can return None for guest checkout
+    return None
+
 @router.post("/orders", response_model=OrderResponse)
 async def create_order(
     order_data: OrderCreate,
-    current_user: User = Depends(get_current_user_optional),
+    current_user: User | None = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db)
 ):
     """CrÃ©er une commande et obtenir le lien de paiement PayDunya"""
