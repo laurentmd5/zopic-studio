@@ -9,9 +9,7 @@ from app.modules.payments import service
 
 router = APIRouter(prefix="/payments", tags=["Payments"])
 
-async def get_current_user_optional() -> User | None:
-    # Mock user for MVP, can return None for guest checkout
-    return None
+from app.modules.auth.service import get_current_user_optional
 
 @router.post("/orders", response_model=OrderResponse)
 async def create_order(

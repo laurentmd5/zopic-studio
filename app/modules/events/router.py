@@ -3,12 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 from app.modules.events import schemas, service
 from app.core.database import get_db
-
-# Note: In a real application, we would use a dependency like `get_current_user`
-# For MVP simplicity, we'll hardcode a fake user_id or accept it in headers/query.
-# Let's mock a user_id dependency for now.
-async def get_current_user_id() -> int:
-    return 1 # Fake user ID for MVP photographer
+from app.modules.auth.service import get_current_user
+from app.modules.auth.models import User
 
 router = APIRouter(prefix="/events", tags=["Events"])
 
@@ -16,9 +12,11 @@ router = APIRouter(prefix="/events", tags=["Events"])
 async def create_event(
     event: schemas.EventCreate, 
     db: AsyncSession = Depends(get_db),
-    user_id: int = Depends(get_current_user_id)
+    current_user: User = Depends(get_current_user)
 ):
-    return await service.create_event(db, event, user_id)
+    if not current_user.is_photographer:
+        raise HTTPException(status_code=403, detail="Only photographers can create events")
+    return await service.create_event(db, event, current_user.id)
 
 @router.get("/", response_model=List[schemas.EventResponse])
 async def read_events(skip: int = 0, limit: int = 100, db: AsyncSession = Depends(get_db)):

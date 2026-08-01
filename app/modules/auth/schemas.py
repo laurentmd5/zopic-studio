@@ -1,20 +1,35 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, ConfigDict
+from typing import Optional
 
 class OTPRequest(BaseModel):
-    email: EmailStr
+    phone_number: str
 
 class OTPVerify(BaseModel):
-    email: EmailStr
+    phone_number: str
     code: str
 
 class Token(BaseModel):
     access_token: str
     token_type: str
 
+class PhotographerProfileBase(BaseModel):
+    full_name: Optional[str] = None
+    bio: Optional[str] = None
+    logo_url: Optional[str] = None
+    payment_number: Optional[str] = None
+
+class PhotographerProfileResponse(PhotographerProfileBase):
+    id: int
+    user_id: int
+    model_config = ConfigDict(from_attributes=True)
+
+class PhotographerProfileUpdate(PhotographerProfileBase):
+    pass
+
 class UserResponse(BaseModel):
     id: int
-    email: EmailStr
+    phone_number: str
     is_photographer: bool
+    photographer_profile: Optional[PhotographerProfileResponse] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

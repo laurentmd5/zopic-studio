@@ -14,6 +14,7 @@ from app.core.database import Base
 from app.modules.auth import models as auth_models
 from app.modules.events import models as events_models
 from app.modules.payments import models as payments_models
+from app.modules.subscriptions import models as subscriptions_models
 
 async def check_and_create_tables():
     # Enforce asyncpg dialect for Alembic if not in URL
@@ -28,6 +29,21 @@ async def check_and_create_tables():
             text("SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'alembic_version');")
         )
         has_alembic = result.scalar()
+        
+        # MVP: Drop old tables to recreate them with phone_number
+        print("Nettoyage des anciennes tables Auth pour migration email -> phone_number...")
+        await conn.execute(text("DROP TABLE IF EXISTS payouts CASCADE;"))
+        await conn.execute(text("DROP TABLE IF EXISTS photo_sales CASCADE;"))
+        await conn.execute(text("DROP TABLE IF EXISTS order_items CASCADE;"))
+        await conn.execute(text("DROP TABLE IF EXISTS orders CASCADE;"))
+        await conn.execute(text("DROP TABLE IF EXISTS subscriptions CASCADE;"))
+        await conn.execute(text("DROP TABLE IF EXISTS storage_usage CASCADE;"))
+        await conn.execute(text("DROP TABLE IF EXISTS photographer_profiles CASCADE;"))
+        await conn.execute(text("DROP TABLE IF EXISTS otp_codes CASCADE;"))
+        await conn.execute(text("DROP TABLE IF EXISTS events CASCADE;"))
+        await conn.execute(text("DROP TABLE IF EXISTS albums CASCADE;"))
+        await conn.execute(text("DROP TABLE IF EXISTS photos CASCADE;"))
+        await conn.execute(text("DROP TABLE IF EXISTS users CASCADE;"))
         
         print("Verification et creation des tables manquantes via SQLAlchemy...")
         await conn.run_sync(Base.metadata.create_all)

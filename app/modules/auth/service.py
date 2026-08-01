@@ -2,37 +2,43 @@ import random
 from datetime import datetime, timedelta, timezone
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from app.modules.auth.models import User, OTPCode
-from app.infrastructure.email_client import email_client
-from app.core.security import create_access_token
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+import jwt
+from pydantic import ValidationError
 
-async def get_user_by_email(db: AsyncSession, email: str) -> User | None:
-    result = await db.execute(select(User).where(User.email == email))
+from app.modules.auth.models import User, OTPCode, PhotographerProfile
+from app.infrastructure.sms_client import sms_client
+from app.core.security import create_access_token, SECRET_KEY, ALGORITHM
+from app.core.database import get_db
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/verify")
+
+async def get_user_by_phone(db: AsyncSession, phone_number: str) -> User | None:
+    result = await db.execute(select(User).where(User.phone_number == phone_number))
     return result.scalars().first()
 
-async def create_user(db: AsyncSession, email: str) -> User:
-    db_user = User(email=email)
+async def create_user(db: AsyncSession, phone_number: str) -> User:
+    db_user = User(phone_number=phone_number)
     db.add(db_user)
     await db.commit()
     await db.refresh(db_user)
     return db_user
 
-async def generate_and_send_otp(db: AsyncSession, email: str):
+async def generate_and_send_otp(db: AsyncSession, phone_number: str):
     code = str(random.randint(100000, 999999))
     expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
     
-    otp = OTPCode(email=email, code=code, expires_at=expires_at)
+    otp = OTPCode(phone_number=phone_number, code=code, expires_at=expires_at)
     db.add(otp)
     await db.commit()
     
-    # Envoi simulé via client
-    await email_client.send_otp(email, code)
+    await sms_client.send_otp(phone_number, code)
     return True
 
-async def verify_otp_and_login(db: AsyncSession, email: str, code: str):
-    # Trouver le code actif
+async def verify_otp_and_login(db: AsyncSession, phone_number: str, code: str):
     stmt = select(OTPCode).where(
-        OTPCode.email == email,
+        OTPCode.phone_number == phone_number,
         OTPCode.code == code,
         OTPCode.is_used == False,
         OTPCode.expires_at > datetime.now(timezone.utc)
@@ -47,10 +53,36 @@ async def verify_otp_and_login(db: AsyncSession, email: str, code: str):
     otp.is_used = True
     await db.commit()
     
-    # Utilisateur
-    user = await get_user_by_email(db, email)
+    user = await get_user_by_phone(db, phone_number)
     if not user:
-        user = await create_user(db, email)
+        user = await create_user(db, phone_number)
         
-    access_token = create_access_token(data={"sub": user.email})
+    access_token = create_access_token(data={"sub": user.phone_number})
     return {"access_token": access_token, "token_type": "bearer"}
+
+async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)) -> User:
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        phone_number: str = payload.get("sub")
+        if phone_number is None:
+            raise credentials_exception
+    except (jwt.PyJWTError, ValidationError):
+        raise credentials_exception
+        
+    user = await get_user_by_phone(db, phone_number)
+    if user is None:
+        raise credentials_exception
+    return user
+
+async def get_current_user_optional(token: str = Depends(OAuth2PasswordBearer(tokenUrl="api/v1/auth/verify", auto_error=False)), db: AsyncSession = Depends(get_db)) -> User | None:
+    if not token:
+        return None
+    try:
+        return await get_current_user(token, db)
+    except HTTPException:
+        return None
