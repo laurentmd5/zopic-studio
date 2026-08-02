@@ -150,8 +150,74 @@
   font-size: 1.1rem;
 }
 
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.hamburgerBtn, .closeMobileSidebar {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-color);
+  cursor: pointer;
+}
+
+.mobileOverlay {
+  display: none;
+}
+
 .content {
   flex: 1;
   overflow-y: auto;
   padding: 2rem;
+}
+
+/* RESPONSIVE DESIGN */
+@media (max-width: 768px) {
+  .hamburgerBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .closeMobileSidebar {
+    display: flex;
+    margin-left: auto;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 50;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .sidebarOpen {
+    transform: translateX(0);
+  }
+
+  .mobileOverlay {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 40;
+  }
+
+  .header {
+    padding: 0 1rem;
+  }
+  
+  .content {
+    padding: 1rem;
+  }
 }

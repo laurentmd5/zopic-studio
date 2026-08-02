@@ -269,3 +269,34 @@
   cursor: pointer;
   font-weight: 600;
 }
+
+/* RESPONSIVE DESIGN */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .controls {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .searchBar {
+    width: 100%;
+  }
+
+  .select {
+    width: 100%;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal {
+    width: 95%;
+    padding: 1.25rem;
+  }
+}

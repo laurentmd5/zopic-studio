@@ -1,6 +1,6 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Outlet, Link, useLocation } from 'react-router-dom'
-import { Camera, LayoutDashboard, FolderOpen, CreditCard, Settings, LogOut, Moon, Sun, Wallet } from 'lucide-react'
+import { Camera, LayoutDashboard, FolderOpen, CreditCard, Settings, LogOut, Moon, Sun, Wallet, Menu, X } from 'lucide-react'
 import { useThemeStore } from '../../store/useThemeStore'
 import { useAuthStore } from '../../store/useAuthStore'
 import styles from './DashboardLayout.module.css'
@@ -8,6 +8,7 @@ import styles from './DashboardLayout.module.css'
 const DashboardLayout: React.FC = () => {
   const { theme, toggleTheme } = useThemeStore()
   const location = useLocation()
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   const navItems = [
     { path: '/', label: 'Tableau de bord', icon: <LayoutDashboard size={20} /> },
@@ -17,7 +18,6 @@ const DashboardLayout: React.FC = () => {
     { path: '/settings', label: 'Paramètres', icon: <Settings size={20} /> },
   ]
 
-  // Determine page title based on route
   const getPageTitle = () => {
     if (location.pathname.startsWith('/competitions')) return 'Compétitions'
     if (location.pathname.startsWith('/billing')) return 'Abonnements'
@@ -26,15 +26,25 @@ const DashboardLayout: React.FC = () => {
     return 'Tableau de bord'
   }
 
+  const closeSidebar = () => setIsSidebarOpen(false)
+
   return (
     <div className={styles.layout}>
+      {/* Mobile Overlay */}
+      {isSidebarOpen && (
+        <div className={styles.mobileOverlay} onClick={closeSidebar}></div>
+      )}
+
       {/* Sidebar */}
-      <aside className={styles.sidebar}>
+      <aside className={`${styles.sidebar} ${isSidebarOpen ? styles.sidebarOpen : ''}`}>
         <div className={styles.brand}>
           <div className={styles.logo}>
             <Camera size={28} />
           </div>
           <h2>ZoPic Studio</h2>
+          <button className={styles.closeMobileSidebar} onClick={closeSidebar}>
+            <X size={24} />
+          </button>
         </div>
 
         <nav className={styles.nav}>
@@ -42,6 +52,7 @@ const DashboardLayout: React.FC = () => {
             <Link 
               key={item.path} 
               to={item.path} 
+              onClick={closeSidebar}
               className={`${styles.navItem} ${location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path)) ? styles.active : ''}`}
             >
               {item.icon}
@@ -69,7 +80,12 @@ const DashboardLayout: React.FC = () => {
       {/* Main Content */}
       <main className={styles.mainContent}>
         <header className={styles.header}>
-          <h1>{getPageTitle()}</h1>
+          <div className={styles.headerLeft}>
+            <button className={styles.hamburgerBtn} onClick={() => setIsSidebarOpen(true)}>
+              <Menu size={24} />
+            </button>
+            <h1>{getPageTitle()}</h1>
+          </div>
           <div className={styles.userProfile}>
             <div className={styles.avatar}>P</div>
           </div>

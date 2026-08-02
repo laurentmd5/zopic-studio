@@ -608,3 +608,35 @@
   background-color: var(--border-color);
   color: var(--primary-color);
 }
+
+/* RESPONSIVE DESIGN */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .content {
+    flex-direction: column;
+  }
+
+  .albumSidebar {
+    width: 100%;
+    flex: none;
+    margin-bottom: 1rem;
+  }
+  
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+
+  .modal {
+    width: 95%;
+    padding: 1.25rem;
+  }
+
+  .linkContainer {
+    flex-direction: column;
+  }
+}
