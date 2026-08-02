@@ -132,7 +132,7 @@ const CompetitionDetail: React.FC = () => {
   }
 
   if (loading || !competition) {
-    return <div className={styles.container}><p>Chargement des détails de l'compétition...</p></div>
+    return <div className={styles.container}><p>Chargement des détails de la compétition...</p></div>
   }
 
 
@@ -161,7 +161,7 @@ const CompetitionDetail: React.FC = () => {
           </button>
           {competition.status !== 'Publié' ? (
             <button className={styles.primaryBtn} onClick={handlePublish}>
-              Publier l'compétition
+              Publier la compétition
             </button>
           ) : (
             <button className={styles.primaryBtn} onClick={() => setShowPublishModal(true)}>

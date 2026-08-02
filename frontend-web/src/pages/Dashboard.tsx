@@ -1,5 +1,6 @@
 import React from 'react'
 import { TrendingUp, Image as ImageIcon, CreditCard, HardDrive } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import styles from './Dashboard.module.css'
 
 const Dashboard: React.FC = () => {
@@ -65,10 +66,10 @@ const Dashboard: React.FC = () => {
         </div>
 
         <div className={styles.recentEvents}>
-          <h3>Compétitions Récents</h3>
+          <h3>Compétitions Récentes</h3>
           <div className={styles.emptyState}>
-            <p>Aucun compétition publié récemment.</p>
-            <button className={styles.createBtn}>Créer un compétition</button>
+            <p>Aucune compétition publiée récemment.</p>
+            <Link to="/competitions" className={styles.createBtn}>Créer une compétition</Link>
           </div>
         </div>
       </div>

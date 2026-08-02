@@ -54,7 +54,7 @@ const Events: React.FC = () => {
       }),
       {
         loading: 'Création en cours...',
-        success: 'Compétition créé avec succès !',
+        success: 'Compétition créée avec succès !',
         error: 'Erreur lors de la création'
       }
     ).then(() => {
@@ -71,12 +71,12 @@ const Events: React.FC = () => {
     <div className={styles.container}>
       <div className={styles.header}>
         <div>
-          <h2 className={styles.title}>Compétitions Sportifs</h2>
+          <h2 className={styles.title}>Compétitions Sportives</h2>
           <p className={styles.subtitle}>Gérez vos epreuves et publiez vos photos.</p>
         </div>
         <button className={styles.primaryBtn} onClick={() => setShowCreateModal(true)}>
           <Plus size={20} />
-          <span>Nouvel compétition</span>
+          <span>Nouvelle compétition</span>
         </button>
       </div>
 
@@ -85,7 +85,7 @@ const Events: React.FC = () => {
           <Search size={18} className={styles.searchIcon} />
           <input 
             type="text" 
-            placeholder="Rechercher un compétition..." 
+            placeholder="Rechercher une compétition..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -103,7 +103,7 @@ const Events: React.FC = () => {
         {loading ? (
           <p>Chargement des compétitions...</p>
         ) : displayEvents.length === 0 ? (
-          <p>Aucun compétition trouvé.</p>
+          <p>Aucune compétition trouvée.</p>
         ) : (
           displayEvents.map((evt) => (
             <Link to={`/competitions/${evt.id}`} key={evt.id} className={styles.cardLink}>
@@ -139,12 +139,12 @@ const Events: React.FC = () => {
         <div className={styles.modalOverlay}>
           <div className={styles.modal}>
             <div className={styles.modalHeader}>
-              <h3>Créer un compétition</h3>
+              <h3>Créer une compétition</h3>
               <button className={styles.closeBtn} onClick={() => setShowCreateModal(false)}>×</button>
             </div>
             <form className={styles.modalForm} onSubmit={handleCreate}>
               <div className={styles.inputGroup}>
-                <label>Nom de l'compétition</label>
+                <label>Nom de la compétition</label>
                 <input 
                   type="text" 
                   required
