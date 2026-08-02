@@ -1,0 +1,320 @@
+.loginContainer {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--color-background);
+}
+
+.leftPanel {
+  flex: 1;
+  background: linear-gradient(135deg, var(--color-primary) 0%, #4a3320 100%);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 4rem;
+  text-align: center;
+}
+
+.logoIcon {
+  margin-bottom: 1.5rem;
+  color: var(--color-accent);
+}
+
+.leftPanel h1 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.leftPanel p {
+  font-size: 1.25rem;
+  opacity: 0.9;
+  max-width: 400px;
+}
+
+.rightPanel {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  background-color: var(--color-surface);
+}
+
+.formWrapper {
+  width: 100%;
+  max-width: 480px;
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.headerText {
+  margin-bottom: 2rem;
+}
+
+.headerText h2 {
+  font-size: 2rem;
+  color: var(--color-text);
+  margin-bottom: 0.5rem;
+}
+
+.headerText p {
+  color: var(--color-text-muted);
+}
+
+.form, .formProfile {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.inputGroup label {
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.inputGroup input, .inputGroup select {
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: var(--color-background);
+  color: var(--color-text);
+  transition: border-color 0.2s;
+}
+
+.inputGroup input:focus, .inputGroup select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.otpInput {
+  letter-spacing: 0.5rem;
+  font-size: 1.5rem !important;
+  text-align: center;
+}
+
+.submitBtn {
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  padding: 1rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s;
+  margin-top: 1rem;
+}
+
+.submitBtn:hover {
+  background-color: #5a3c26;
+}
+
+/* Sports Grid */
+.sportsGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.sportChip {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  background-color: var(--color-border);
+  color: var(--color-text);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.sportChip.selected {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+/* Carousel */
+.carouselWrapper {
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.carouselSlide {
+  margin-bottom: 2rem;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.slideIcon {
+  color: var(--color-primary);
+  margin-bottom: 1.5rem;
+}
+
+.carouselSlide h2 {
+  margin-bottom: 1rem;
+  color: var(--color-text);
+}
+
+.carouselSlide p {
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+.carouselControls {
+  display: flex;
+  justify-content: center;
+}
+
+/* Subscription */
+.subscriptionWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.plansGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.planCard {
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background-color: var(--color-background);
+}
+
+.planCardPro {
+  border: 2px solid var(--color-primary);
+  box-shadow: 0 8px 24px rgba(107, 72, 45, 0.15);
+}
+
+.popularBadge {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--color-primary);
+  color: white;
+  padding: 0.25rem 1rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.planCard h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-text);
+}
+
+.price {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: var(--color-text);
+}
+
+.price span {
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+.planCard ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem 0;
+  flex-grow: 1;
+}
+
+.planCard li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.planCard li svg {
+  color: var(--color-accent);
+}
+
+.planBtnOutline {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  padding: 0.75rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.planBtnOutline:hover {
+  border-color: var(--color-text);
+}
+
+.planBtnFull {
+  background-color: var(--color-primary);
+  border: none;
+  color: white;
+  padding: 0.75rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.planBtnFull:hover {
+  background-color: #5a3c26;
+}
+
+.skipBtn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0.5rem;
+  align-self: center;
+}
+
+.skipBtn:hover {
+  color: var(--color-text);
+}
+
+@media (max-width: 768px) {
+  .loginContainer {
+    flex-direction: column;
+  }
+  
+  .leftPanel {
+    padding: 2rem;
+    min-height: 250px;
+  }
+  
+  .plansGrid {
+    grid-template-columns: 1fr;
+  }
+}

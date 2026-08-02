@@ -1,0 +1,557 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.titleArea {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--surface-color);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.backBtn:hover {
+  background-color: var(--border-color);
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.9rem;
+  color: var(--secondary-color);
+}
+
+.badge {
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  background-color: #fff3e0;
+  color: #ef6c00;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+[data-theme="dark"] .badge {
+  background-color: rgba(239, 108, 0, 0.2);
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+}
+
+.secondaryBtn, .primaryBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.secondaryBtn {
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+}
+
+.secondaryBtn:hover {
+  border-color: var(--secondary-color);
+}
+
+.primaryBtn {
+  background-color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+  color: white;
+}
+
+.primaryBtn:hover {
+  background-color: var(--primary-hover);
+}
+
+.content {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+.albumSidebar {
+  flex: 0 0 250px;
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+}
+
+.albumHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.albumHeader h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.iconBtn {
+  background: none;
+  border: none;
+  color: var(--secondary-color);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconBtn:hover {
+  background-color: var(--bg-color);
+  color: var(--primary-color);
+}
+
+.albumList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.albumItem, .albumItemActive {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.95rem;
+  gap: 10px;
+}
+
+.albumItem:hover {
+  background-color: var(--bg-color);
+}
+
+.albumItemActive {
+  background-color: rgba(107, 142, 35, 0.1);
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.albumIcon {
+  color: var(--secondary-color);
+}
+
+.albumItemActive .albumIcon {
+  color: var(--primary-color);
+}
+
+.albumCount {
+  margin-left: auto;
+  font-size: 0.8rem;
+  background-color: var(--border-color);
+  padding: 2px 8px;
+  border-radius: 12px;
+  color: var(--text-color);
+}
+
+.albumItemActive .albumCount {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.mainExplorer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.dropzone {
+  border: 2px dashed var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 4rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background-color: var(--surface-color);
+  transition: all 0.2s ease;
+  margin-bottom: 2rem;
+}
+
+.dropzone.dragging {
+  border-color: var(--primary-color);
+  background-color: rgba(107, 142, 35, 0.05);
+}
+
+.uploadIcon {
+  color: var(--secondary-color);
+  margin-bottom: 1rem;
+}
+
+.dropzone h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.browseBtn {
+  display: inline-block;
+  margin-top: 1rem;
+  padding: 10px 20px;
+  background-color: var(--primary-color);
+  color: white;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.browseBtn:hover {
+  background-color: var(--primary-hover);
+}
+
+.fileInput {
+  display: none;
+}
+
+.limits {
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  color: var(--secondary-color);
+}
+
+.uploadProgress {
+  background-color: var(--surface-color);
+  padding: 1.5rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  margin-bottom: 2rem;
+}
+
+.progressHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.progressBar {
+  height: 8px;
+  background-color: var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background-color: var(--primary-color);
+  transition: width 0.3s ease;
+}
+
+.content {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+.albumSidebar {
+  flex: 0 0 250px;
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+}
+
+.albumHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.albumHeader h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.iconBtn {
+  background: none;
+  border: none;
+  color: var(--secondary-color);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconBtn:hover {
+  background-color: var(--bg-color);
+  color: var(--primary-color);
+}
+
+.albumList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.albumItem, .albumItemActive {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.95rem;
+  gap: 10px;
+}
+
+.albumItem:hover {
+  background-color: var(--bg-color);
+}
+
+.albumItemActive {
+  background-color: rgba(107, 142, 35, 0.1);
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.albumIcon {
+  color: var(--secondary-color);
+}
+
+.albumItemActive .albumIcon {
+  color: var(--primary-color);
+}
+
+.albumCount {
+  margin-left: auto;
+  font-size: 0.8rem;
+  background-color: var(--border-color);
+  padding: 2px 8px;
+  border-radius: 12px;
+  color: var(--text-color);
+}
+
+.albumItemActive .albumCount {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.mainExplorer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.gallerySection {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.galleryHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.galleryHeader h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.textBtn {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.photoCard {
+  background-color: var(--surface-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.photoCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.photoWrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3/2;
+  overflow: hidden;
+  background-color: #eee;
+}
+
+[data-theme="dark"] .photoWrapper {
+  background-color: #333;
+}
+
+.photoWrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photoOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 8px;
+  transition: opacity 0.2s;
+}
+
+.photoCard:hover .photoOverlay {
+  opacity: 1;
+}
+
+.deleteBtn {
+  background-color: rgba(255, 255, 255, 0.9);
+  color: #d32f2f;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.deleteBtn:hover {
+  background-color: #d32f2f;
+  color: white;
+}
+
+.photoInfo {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.photoName {
+  font-weight: 500;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.photoSize {
+  color: var(--secondary-color);
+  font-size: 0.8rem;
+}
+
+/* Publish Modal specific */
+.publishContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.qrContainer {
+  padding: 1.5rem;
+  background-color: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+}
+
+.linkContainer {
+  display: flex;
+  width: 100%;
+  gap: 8px;
+}
+
+.linkInput {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-size: 0.95rem;
+  outline: none;
+}
+
+.copyBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  border-radius: var(--radius-md);
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.copyBtn:hover {
+  background-color: var(--border-color);
+  color: var(--primary-color);
+}

@@ -1,0 +1,1003 @@
+ZOPIC STUDIO — DOCUMENT DE CONCEPTION PRODUIT
+Plateforme Intelligente de Photos Sportives
+
+Version	Date	Statut	Classification
+4.0	Juillet 2026	Final — Document de Référence Unique	Confidentiel
+TABLE DES MATIÈRES
+PARTIE 1 — VISION
+Présentation Générale
+
+Identité du Produit
+
+Vision et Ambition
+
+Analyse du Marché et Positionnement Concurrentiel
+
+PARTIE 2 — UTILISATEURS
+Personas
+
+Parcours Utilisateurs
+
+PARTIE 3 — FONCTIONNALITÉS
+Fonctionnalités
+
+Roadmap
+
+PARTIE 4 — MODÈLE ÉCONOMIQUE
+Modèle Économique et Analyse Financière
+
+PARTIE 5 — ARCHITECTURE TECHNIQUE
+Architecture Globale
+
+Stack Technique
+
+Spécifications API
+
+Schéma de Base de Données
+
+Workers et Tâches Asynchrones
+
+PARTIE 6 — SÉCURITÉ, IA ET CONFORMITÉ
+Architecture de Sécurité
+
+Gouvernance de l'Intelligence Artificielle
+
+Conformité et Protection des Données Biométriques
+
+PARTIE 7 — INFRASTRUCTURE
+Infrastructure et Déploiement
+
+Performance et Objectifs de Service
+
+PARTIE 8 — CONCEPTION
+Design System et Maquettes
+
+Indicateurs Clés
+
+Équipe Recommandée
+
+Points de Vigilance et Solutions
+
+PARTIE 9 — ANNEXES
+Stratégie d'Abstraction des Fournisseurs
+
+Glossaire
+
+Conclusion
+
+PARTIE 1 — VISION
+1. PRÉSENTATION GÉNÉRALE
+1.1 Résumé Exécutif
+ZoPic Studio est une plateforme unique qui connecte les photographes sportifs aux participants. Elle permet à un photographe de publier ses photos d'événement, à l'intelligence artificielle d'indexer automatiquement les visages, et aux sportifs de retrouver leurs photos par simple selfie et de les acheter via le paiement mobile money.
+
+La plateforme intègre également un espace de stockage cloud avec galeries privées, épreuvage client et watermarking automatique, accessible via abonnement.
+
+1.2 La Promesse du MVP
+Un photographe publie un événement. Un participant prend un selfie, retrouve toutes ses photos en quelques secondes, et les achète avec Wave ou Orange Money.
+
+1.3 Un Produit, Deux Applications
+ZoPic Studio se décline en deux applications distinctes partageant le même backend :
+
+Application	Public	Plateformes	Usage principal
+ZoPic Photographe	Photographes professionnels	Mobile (Flutter) + Web (React/Vite)	Upload, gestion, stockage, suivi des ventes
+ZoPic Photos	Sportifs, parents, clients finaux	Mobile (Flutter) + Web (React/Vite)	Recherche par selfie, achat, téléchargement
+Les deux applications partagent un backend unique en architecture monolithe modulaire, avec extraction progressive en microservices si la charge l'exige.
+
+1.4 Modèle Économique
+Source	Type	Description
+Abonnement stockage	Récurrent	Plans de stockage cloud pour photographes
+Commission sur ventes	Variable	25% sur chaque photo vendue
+Portfolio Sportif	Récurrent	Abonnement mensuel pour les sportifs (Phase 3)
+2. IDENTITÉ DU PRODUIT
+2.1 Fiche d'Identité
+Élément	Valeur
+Nom	ZoPic Studio
+Slogan	Vos exploits, vos photos, en un clin d'œil.
+Tagline Photographes	Stockez, partagez, vendez. Tout en un.
+Tagline Sportifs	Retrouvez toutes vos photos de sport en un selfie.
+Type de produit	SaaS B2B2C
+Applications	ZoPic Photographe + ZoPic Photos
+Modèle économique	Abonnement + Commission
+Marché initial	Sénégal
+Expansion	Afrique francophone → Afrique anglophone
+Langues	Français (MVP), Wolof (Phase 2), Anglais (Phase 3)
+2.2 Origine du Nom
+ZoPic — contraction de Zo (zoom, précision, instantanéité) et Pic (image, photo). Studio renforce le positionnement professionnel. Le nom est court, mémorisable et fonctionne dans plusieurs langues.
+
+2.3 Valeurs de la Marque
+Simplicité : expérience fluide, du selfie au téléchargement.
+
+Souveraineté : données biométriques sur notre infrastructure exclusive.
+
+Confiance : protection maximale des photos.
+
+Accessibilité : prix adaptés au marché africain.
+
+3. VISION ET AMBITION
+3.1 Court Terme (12 mois)
+Devenir la plateforme de référence pour les photographes sportifs sénégalais.
+
+200 photographes abonnés.
+
+400 événements créés par mois.
+
+25 000 photos vendues par mois.
+
+Revenu brut mensuel supérieur à 6 000 000 FCFA.
+
+3.2 Moyen Terme (36 mois)
+Expansion en Afrique francophone.
+
+2 000 photographes actifs.
+
+Diversification vers la photo de mariage, l'événementiel et le corporate.
+
+Introduction de l'impression à la demande.
+
+Revenu brut mensuel supérieur à 50 000 000 FCFA.
+
+3.3 Long Terme (60 mois)
+Plateforme panafricaine tout-en-un pour photographes.
+
+Couverture de l'ensemble du continent africain.
+
+Introduction du Portfolio Sportif (ZoPic Athlete) : les sportifs créent un portfolio dynamique alimenté par les photos vendues, avec un CV auto-généré.
+
+Intégration des standards internationaux (C2PA Content Credentials).
+
+API publique pour intégrations tierces.
+
+Expansion vers la diaspora africaine en Europe.
+
+4. ANALYSE DU MARCHÉ ET POSITIONNEMENT CONCURRENTIEL
+4.1 Données du Marché Sénégalais
+Indicateur	Valeur
+Population	~18 millions
+Pénétration mobile	> 100%
+Pénétration smartphones	~40-50%
+Utilisateurs Wave	> 8 millions
+Utilisateurs Orange Money	> 5 millions
+Événements sportifs populaires	Navétanes, lutte sénégalaise, marathons, tournois scolaires
+Photographes indépendants estimés	Plusieurs centaines
+4.2 Analyse Concurrentielle
+Plateformes de Stockage et Galeries
+Concurrent	Forces	Faiblesses face à ZoPic Studio
+Pixieset	Client proofing	Pas de reconnaissance faciale, pas de Mobile Money, abonnement en dollars
+SmugMug	Protection, galeries pro	Pas d'IA, pas de Mobile Money, coûteux
+Zenfolio	Sites web photographes	Pas d'IA, marché africain non adressé
+PhotoShelter	Outils pro	Pas d'IA, orienté marchés occidentaux
+ShootProof	Client proofing	Pas d'IA, pas de Mobile Money
+Google Drive / Dropbox	Connus, gratuits (base)	Aucune fonctionnalité métier : pas de conversion RAW, pas d'épreuvage, pas de watermark, pas de vente
+Vente Manuelle
+Concurrent	Forces	Faiblesses
+Facebook / WhatsApp	Gratuit, large audience	Aucune automatisation, pas de protection, pas de paiement intégré
+4.3 Avantage Concurrentiel
+ZoPic Studio est la seule plateforme qui combine :
+
+✅ Reconnaissance faciale par selfie.
+
+✅ Paiement mobile money intégré (Wave, Orange Money).
+
+✅ Stockage cloud avec fonctionnalités métier (épreuvage, watermark, conversion RAW).
+
+✅ Modèle sans abonnement obligatoire pour vendre.
+
+✅ Souveraineté des données biométriques.
+
+✅ Marché initial africain avec expansion panafricaine.
+
+PARTIE 2 — UTILISATEURS
+5. PERSONAS
+5.1 Le Photographe Sportif
+Moussa, 32 ans, Dakar. Indépendant. 3 à 4 événements par semaine, 500 à 2 000 photos par événement.
+
+Problèmes :
+
+Vente manuelle par Facebook/WhatsApp
+
+Photos volées
+
+Pas d'outil de stockage adapté
+
+Ne monétise que 5 à 10% de sa production
+
+Attentes :
+
+Uploader et vendre automatiquement
+
+Paiement Mobile Money intégré
+
+Protection des photos
+
+Galeries privées
+
+Interface en français
+
+Application : ZoPic Photographe
+
+5.2 Le Sportif
+Amadou, 24 ans, Pikine. Footballeur de navétanes. Smartphone Android, Wave et Orange Money.
+
+Problèmes :
+
+Fouiller des albums Facebook
+
+Photos de mauvaise qualité
+
+Paiement risqué
+
+Attentes :
+
+Selfie → retrouver ses photos
+
+Payer en quelques secondes avec Wave
+
+Télécharger en HD
+
+Prix 200 à 1 000 FCFA
+
+Application : ZoPic Photos
+
+5.3 Le Parent
+Fatou, 38 ans, Thiès. Mère de famille. Smartphone entrée de gamme, Wave.
+
+Problèmes :
+
+Ne peut pas utiliser le selfie (c'est son enfant)
+
+Ne connaît pas le dossard
+
+N'est pas à l'aise avec les applis complexes
+
+Attentes :
+
+Chercher par équipe/catégorie
+
+Interface simple
+
+Payer sans compte
+
+Recevoir par WhatsApp
+
+Application : ZoPic Photos
+
+6. PARCOURS UTILISATEURS
+6.1 Parcours Photographe
+Inscription : Télécharge ZoPic Photographe, s'inscrit par SMS, remplit son profil et son numéro Wave/OM.
+
+Création d'événement : Nom, date, lieu, sport, catégories, prix par photo.
+
+Upload : Sélectionne ses photos, upload avec barre de progression.
+
+Traitement automatique : Miniatures, watermark, détection des visages, indexation.
+
+Publication : Rend public, partage le QR code.
+
+Ventes : Reçoit des notifications, suit son tableau de bord.
+
+Rétrocession : Reçoit ses gains tous les 15 jours.
+
+6.2 Parcours Sportif
+Découverte : Scanne le QR code ou reçoit un lien WhatsApp.
+
+Mode de recherche : Selfie, dossard, équipe, ou parcourir tout.
+
+Selfie : Prend une photo, l'IA retrouve ses photos.
+
+Galerie : Voit ses photos avec filigrane, sélectionne.
+
+Paiement : Wave ou Orange Money, validation.
+
+Téléchargement : Photos en HD, lien SMS.
+
+6.3 Parcours Parent
+Accès : Lien WhatsApp.
+
+Recherche : Par équipe ou catégorie.
+
+Achat : Sans compte, Wave.
+
+Réception : SMS ou WhatsApp.
+
+PARTIE 3 — FONCTIONNALITÉS
+7. FONCTIONNALITÉS
+7.1 ZoPic Photographe (Mobile + Web)
+Authentification et Profil
+Inscription/connexion par SMS OTP (passwordless).
+
+Profil : nom, type, bio, logo, numéro Wave/OM.
+
+Stockage Cloud (Abonnement)
+Trois plans : Starter (200 Go, 6 500 F/mois), Pro (1 To, 16 500 F/mois), Studio (3 To, 39 000 F/mois).
+
+Upload massif avec barre de progression.
+
+Explorateur de fichiers avec dossiers.
+
+Suivi quota, alerte 80%, blocage si dépassement.
+
+Génération automatique de miniatures.
+
+Conversion RAW → JPEG.
+
+Galeries Privées
+Création de galeries avec mot de passe.
+
+Client proofing : likes et commentaires.
+
+Watermark automatique avec logo.
+
+Événements Sportifs
+Création : nom, date, lieu, sport, catégories, prix.
+
+Organisation en albums.
+
+Statuts : Brouillon, Publié, Clôturé.
+
+QR code et lien de partage.
+
+Upload et Traitement IA
+Upload massif avec URLs présignées.
+
+Traitement automatique : miniatures, watermark, détection visages, extraction vecteurs, indexation.
+
+Tag manuel de dossards.
+
+Tableau de Bord
+Ventes par événement, revenus, solde disponible.
+
+Historique des rétrocessions.
+
+Jauge de stockage.
+
+Centre de notifications.
+
+7.2 ZoPic Photos (Mobile + Web)
+Recherche
+Selfie : photo → IA → résultats.
+
+Dossard : numéro → photos taguées.
+
+Équipe/Catégorie : filtrage.
+
+Parcourir tout.
+
+Fallback automatique si selfie échoue.
+
+Achat
+Panier avec récapitulatif.
+
+Paiement Wave / Orange Money (PayDunya).
+
+Achat invité sans création de compte.
+
+Livraison
+Dévoilement progressif : aperçu → HD.
+
+Téléchargement individuel ou lot.
+
+Lien valable 24h, 3 téléchargements.
+
+SMS de confirmation.
+
+Option WhatsApp.
+
+7.3 Fonctionnalités Phase 2 (3 à 6 mois)
+Dévoilement progressif avec animation.
+
+Liveness Detection (vérification de vivacité).
+
+Filigrane invisible.
+
+Remises par lot.
+
+Galeries portfolio publiques.
+
+7.4 Fonctionnalités Phase 3 (12 à 18 mois)
+ZoPic Athlete : portfolios sportifs avec CV auto-généré.
+
+Multilingue (wolof, anglais).
+
+Multi-pays.
+
+Application iOS.
+
+Application desktop de synchronisation.
+
+Mode sombre.
+
+API publique.
+
+8. ROADMAP
+Phase 1 — MVP (4 mois)
+Mois	Livrables
+M1	Architecture backend, CI/CD, authentification SMS, base de données, structure multi-tenant R2
+M2	CRUD événements, upload URLs présignées, miniatures, watermark, explorateur fichiers, plans d'abonnement, paiement abonnement
+M3	Indexation faciale (InsightFace + Qdrant), recherche selfie/dossard/équipe, galeries privées, client proofing, interface mobile ZoPic Photographe
+M4	Interface mobile ZoPic Photos, intégration PayDunya complète, achat photos, téléchargement HD, tableaux de bord, tests, corrections
+Phase 2 — Croissance (6 mois)
+Dévoilement progressif, Liveness Detection, filigrane invisible, remises, galeries portfolio.
+
+Phase 3 — Expansion (12 à 18 mois)
+ZoPic Athlete, multilingue, multi-pays, iOS, desktop sync, mode sombre, API publique.
+
+PARTIE 4 — MODÈLE ÉCONOMIQUE
+9. MODÈLE ÉCONOMIQUE ET ANALYSE FINANCIÈRE
+9.1 Sources de Revenus
+Source	Type	Description
+Abonnement stockage	Récurrent	Plans Starter, Pro, Studio
+Commission sur ventes	Variable	25% sur chaque photo vendue
+Portfolio Sportif	Récurrent	Abonnement mensuel (Phase 3)
+9.2 Grille Tarifaire — Stockage
+Plan	Capacité	Prix mensuel	Prix annuel	Économie annuelle	Marge estimée
+Starter	200 Go	6 500 FCFA	65 000 FCFA	13 000 FCFA	~72%
+Pro	1 To	16 500 FCFA	165 000 FCFA	33 000 FCFA	~45%
+Studio	3 To	39 000 FCFA	390 000 FCFA	78 000 FCFA	~30%
+Notes sur la rentabilité :
+
+Le coût du stockage pour ZoPic Studio est d'environ 10 FCFA par Go par mois (Cloudflare R2, sans frais de transfert).
+
+Les utilisateurs consomment rarement 100% de leur quota (overselling passif), ce qui améliore la marge réelle.
+
+Le paiement annuel sécurise la trésorerie et réduit le risque de désabonnement.
+
+9.3 Commission sur Ventes
+Paramètre	Valeur
+Commission ZoPic Studio	25% du prix de vente TTC
+Part photographe	75% du prix de vente TTC
+Prix minimum par photo	200 FCFA
+Prix recommandé	500 FCFA
+Prix maximum	Libre
+Rétrocession	Automatique tous les 15 jours
+Seuil minimum de rétrocession	5 000 FCFA
+9.4 Coûts d'Exploitation (Mensuels — 12 mois)
+Poste	Coût estimé	Détail
+Stockage R2	1 000 000 FCFA	200 utilisateurs × 50% utilisation
+Trafic CDN	0 FCFA	Pas de frais egress Cloudflare R2
+Serveurs	500 000 FCFA	2 VPS (API + Workers IA)
+PostgreSQL managé	150 000 FCFA	Instance de base
+Redis managé	50 000 FCFA	Instance de base
+SMS	75 000 FCFA	~5 000 SMS/mois
+PayDunya	Variable	Commission sur transactions
+Sauvegardes	50 000 FCFA	Snapshots
+Divers	100 000 FCFA	Domaines, emails, monitoring
+TOTAL	~1 925 000 FCFA	
+9.5 Simulation Financière — 12 Mois
+Poste	Mensuel	Annuel
+Revenu abonnements	3 300 000 FCFA	39 600 000 FCFA
+Revenu commissions	3 125 000 FCFA	37 500 000 FCFA
+Revenu brut	6 425 000 FCFA	77 100 000 FCFA
+Coûts exploitation	1 925 000 FCFA	23 100 000 FCFA
+Marge brute	4 500 000 FCFA	54 000 000 FCFA
+9.6 Seuil de Rentabilité
+Atteint à environ 100 photographes abonnés au plan Pro et 12 000 photos vendues par mois.
+
+PARTIE 5 — ARCHITECTURE TECHNIQUE
+10. ARCHITECTURE GLOBALE
+10.1 Un Backend, Deux Frontends
+text
+┌─────────────────────────────────────────────────────────────────┐
+│                     ZOPIC STUDIO — ARCHITECTURE                  │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ZOPIC PHOTOGRAPHE              ZOPIC PHOTOS                    │
+│  ┌──────────┐ ┌──────────┐      ┌──────────┐ ┌──────────┐    │
+│  │ Flutter  │ │ React    │      │ Flutter  │ │ React    │    │
+│  │ (Mobile) │ │ (Web)    │      │ (Mobile) │ │ (Web)    │    │
+│  └─────┬────┘ └─────┬────┘      └─────┬────┘ └─────┬────┘    │
+│        │            │                 │            │          │
+│        └────────────┼─────────────────┼────────────┘          │
+│                     │                 │                        │
+│                     ▼                 ▼                        │
+│              ┌─────────────────────────────┐                   │
+│              │       API GATEWAY           │                   │
+│              │    (Nginx / Cloudflare)     │                   │
+│              └─────────────┬───────────────┘                   │
+│                            │                                    │
+│                            ▼                                    │
+│              ┌─────────────────────────────┐                   │
+│              │   BACKEND UNIQUE (FastAPI)  │                   │
+│              │   Monolithe Modulaire       │                   │
+│              │                             │                   │
+│              │  Auth • Events • Photos     │                   │
+│              │  Face • Storage • Payments  │                   │
+│              │  Galleries • Subscriptions  │                   │
+│              └─────────────┬───────────────┘                   │
+│                            │                                    │
+│          ┌─────────────────┼─────────────────┐                │
+│          ▼                 ▼                  ▼                │
+│    ┌──────────┐    ┌──────────┐      ┌──────────────┐        │
+│    │PostgreSQL│    │  Redis   │      │ Cloudflare R2│        │
+│    └──────────┘    └──────────┘      └──────────────┘        │
+│                            │                                    │
+│                     ┌──────┴──────┐                            │
+│                     │   Qdrant    │                            │
+│                     │  (Vecteurs) │                            │
+│                     └─────────────┘                            │
+│                                                                 │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │              WORKERS (Arq) — Même backend               │   │
+│  │  • Miniatures • Watermark • Détection visages            │   │
+│  │  • Extraction vecteurs • Indexation Qdrant               │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+10.2 Architecture Logicielle : Monolithe Modulaire
+Pour le MVP, un seul projet FastAPI organisé en modules indépendants. Chaque module est auto-contenu avec son router, service et repository. Communication inter-modules via services, pas via imports directs. Cette architecture permet une extraction progressive en microservices si la charge l'exige.
+
+Principes :
+
+Un seul projet, un seul déploiement.
+
+Organisation en modules indépendants.
+
+Chaque module est auto-contenu.
+
+Communication inter-modules via des appels de service.
+
+Base de données partagée mais accédée module par module.
+
+Stratégie d'évolution :
+
+Extraction progressive de certains modules en microservices.
+
+Modules prioritaires : reconnaissance faciale (CPU-intensif), stockage (fort volume), paiements (isolation de sécurité).
+
+11. STACK TECHNIQUE
+Couche	Technologie	Justification
+Mobile (2 apps)	Flutter	Codebase unique pour chaque app
+Web (2 apps)	React + Vite	Rapide, moderne, build instantané
+Backend API	FastAPI (Python)	Performance, écosystème IA natif
+Workers	Arq (Python)	File d'attente Redis, fiable, mature
+Base de données	PostgreSQL 16+	ACID, JSONB, support asynchrone
+Cache / Queue	Redis 7+	Sessions, cache, jobs
+Base vectorielle	Qdrant	Souveraineté, recherche faciale
+IA faciale	InsightFace + ONNX Runtime	Open source, état de l'art, pas de cloud tiers
+Traitement image	Pillow (Python)	Miniatures, watermark, conversion RAW
+Stockage	Cloudflare R2	Zéro frais egress, compatible S3
+CDN / WAF	Cloudflare	Performance, DDoS, cache
+Paiement	PayDunya	Wave + Orange Money au Sénégal
+SMS	Twilio / Infobip	OTP, notifications
+Observabilité	Prometheus + Grafana + Loki	Métriques, logs, traces
+Justification des choix principaux :
+
+Flutter : Performance native supérieure, meilleur pour les flux caméra et les galeries d'images performantes.
+
+FastAPI : Écosystème IA natif en Python, stack unifiée pour l'API et les workers IA.
+
+InsightFace + Qdrant : Souveraineté des données, pas de coût par requête, conformité locale.
+
+Cloudflare R2 : Zéro frais de transfert, tarification prévisible.
+
+12. SPÉCIFICATIONS API
+12.1 Conventions
+Élément	Convention
+Base URL	https://api.zopic.studio/v1
+Format	JSON
+Authentification	Authorization: Bearer <JWT>
+Access Token	15 minutes
+Refresh Token	7 jours, rotation
+Pagination	?page=1&limit=20 (max 100)
+Datetime	ISO 8601 (2026-07-30T14:30:00Z)
+Montants	Entiers en FCFA (pas de décimales)
+Erreurs	{"error": {"code": "...", "message": "..."}}
+Codes HTTP standardisés : 400 (validation), 401 (authentification), 403 (autorisation), 404 (ressource), 409 (conflit), 413 (quota dépassé), 422 (erreur métier), 429 (limite de débit), 500 (erreur serveur).
+
+12.2 Principaux Modules d'Endpoints
+Module	Endpoints principaux
+Auth	OTP, vérification, refresh, profil
+Subscriptions	Plans, souscrire, confirmer
+Storage	Quota, upload-url, fichiers
+Events	CRUD, publier, clôturer, photos
+Albums	CRUD, ajouter/retirer photos
+Search	Selfie, dossard, équipe
+Orders	Créer, payer, statut
+Galleries	Créer, accès public protégé
+Webhooks	PayDunya, simulation (dev)
+Dashboard	Ventes, solde, stats
+13. SCHÉMA DE BASE DE DONNÉES
+13.1 Vue d'Ensemble
+23 tables principales organisées par domaine :
+
+#	Table	Domaine	Rôle
+1	users	Auth	Comptes utilisateurs
+2	otp_codes	Auth	Codes SMS temporaires
+3	refresh_tokens	Auth	Tokens de rafraîchissement
+4	photographer_profiles	Photographes	Profils étendus, préférences
+5	plans	Abonnements	Catalogue de plans
+6	subscriptions	Abonnements	Abonnements actifs
+7	invoices	Abonnements	Factures
+8	storage_usage	Stockage	Quota en temps réel
+9	folders	Stockage	Arborescence
+10	events	Événements	Événements sportifs
+11	albums	Événements	Albums
+12	photos	Photos	Métadonnées, statuts
+13	photo_faces	Photos	Visages détectés, bounding boxes
+14	photo_sales	Photos	Suivi détaillé des ventes (ledger)
+15	orders	Commandes	Commandes clients
+16	order_items	Commandes	Lignes de commande
+17	payouts	Rétrocessions	Versements
+18	galleries	Galeries	Galeries privées
+19	gallery_photos	Galeries	Photos dans les galeries
+20	gallery_likes	Galeries	Likes des clients
+21	gallery_comments	Galeries	Commentaires
+22	sms_logs	Notifications	Historique SMS
+23	audit_logs	Audit	Journal d'audit
+13.2 Éléments Notables
+Modèle Ledger :
+
+Table photo_sales immuable.
+
+Vue photographer_balances pour le solde en temps réel.
+
+Trigger PostgreSQL pour le cache dans photographer_profiles.
+
+Soft Delete :
+
+Colonne deleted_at sur photos.
+
+Worker garbage collection R2 après 24h de délai de grâce.
+
+Bounding Boxes :
+
+Colonne JSONB dans photo_faces pour les coordonnées spatiales.
+
+Paramétrage flexible :
+
+Colonnes settings JSONB sur photographer_profiles et events.
+
+Idempotence :
+
+Contraintes UNIQUE sur payment_transaction_id.
+
+Multi-tenant :
+
+Colonne user_id sur toutes les tables.
+
+Préfixe R2 par utilisateur.
+
+14. WORKERS ET TÂCHES ASYNCHRONES
+14.1 Files et Workers
+File	Priorité	Workers	Rôle
+critical	3 (max)	4	Miniatures, watermark, conversion RAW
+ia_realtime	3 (max)	2	Selfie vector (temps réel)
+ia_batch	2	3	Détection et extraction faciales
+standard	2	2	Indexation Qdrant, crons
+notifications	1 (basse)	1	SMS, push
+Justification de ia_realtime :
+
+Sans cette file dédiée, un selfie de recherche serait mis en attente derrière des milliers de photos.
+
+Garantit une réponse en temps réel même pendant un upload massif.
+
+14.2 Jobs
+Job	File	Déclencheur	Timeout	Retries
+Génération miniature + watermark	critical	Upload confirmé	60s	3
+Watermark dynamique	critical	Consultation	30s	2
+Conversion RAW → JPEG	critical	Upload RAW	120s	2
+Extraction vecteur selfie	ia_realtime	Recherche selfie	15s	1
+Détection et extraction faciales	ia_batch	Upload confirmé	180s	3
+Reconciliation des paiements	standard	Cron 15 min	60s	1
+Nettoyage collections Qdrant	standard	Cron jour 3h	120s	2
+Rétrocession automatique	standard	Cron jour 2h	300s	2
+Vérification abonnements	standard	Cron jour 9h	60s	1
+Nettoyage fichiers orphelins R2	standard	Cron jour 4h	300s	2
+Envoi SMS	notifications	Événement	30s	2
+Envoi notification push	notifications	Événement	15s	1
+14.3 Résilience
+Backoff exponentiel : délai croissant en cas d'échec.
+
+Dead Letter Queue (DLQ) : après 3 échecs, inspection manuelle.
+
+Recyclage workers IA : max_jobs=500, redémarrage automatique.
+
+Verrouillage transactionnel : SELECT FOR UPDATE SKIP LOCKED pour rétrocessions.
+
+Indexation Qdrant en batch : un seul appel groupé par photo.
+
+PARTIE 6 — SÉCURITÉ, IA ET CONFORMITÉ
+15. ARCHITECTURE DE SÉCURITÉ
+15.1 Principes Fondamentaux
+Principe	Description
+Défense en profondeur	Superposition de couches de protection indépendantes
+Rendre le vol plus coûteux que l'achat	Combinaison de mesures rendant le piratage trop contraignant
+Souveraineté biométrique	InsightFace + Qdrant on-premise
+Zero Trust	Chaque requête est authentifiée et autorisée
+Moindre privilège	Accès minimal par service
+15.2 Protection des Photos
+Type	Protection
+Aperçus	Génération dynamique, 1200px, JPEG 40%, watermark visible personnalisé
+Originaux (HD)	Bucket R2 privé, Object Lock, MFA Delete, chiffrement
+Photos livrées	Watermark invisible (DWT), URL signée 24h, 3 téléchargements max, empreintes SHA-256 et pHash
+Watermark invisible :
+
+Utilise la transformation en ondelettes discrètes (DWT).
+
+Intègre l'identifiant de l'acheteur dans l'image.
+
+Permet la traçabilité en cas de fuite.
+
+15.3 Sécurité des Paiements
+Service isolé du reste de l'application.
+
+Idempotence garantie par contrainte unique.
+
+Machine à états stricte.
+
+Reconciliation toutes les 15 minutes.
+
+Verrou transactionnel PostgreSQL.
+
+16. GOUVERNANCE DE L'INTELLIGENCE ARTIFICIELLE
+16.1 Versionnement des Modèles
+Chaque version du modèle InsightFace est taguée et tracée.
+
+Validation obligatoire sur jeu de données de référence avant déploiement.
+
+Rollback possible immédiatement en cas de dégradation.
+
+16.2 Seuils de Confiance
+Seuil par défaut : 0.85.
+
+Configurable par événement selon les conditions (éclairage, sport).
+
+Métriques de performance mesurées à chaque changement.
+
+16.3 Surveillance Continue
+Monitoring des taux de faux positifs et faux négatifs.
+
+Feedback utilisateur : signalement "Je n'ai pas trouvé mes photos".
+
+Jeux de test conservés et diversifiés (ethnie, âge, luminosité).
+
+17. CONFORMITÉ ET PROTECTION DES DONNÉES BIOMÉTRIQUES
+17.1 Principes
+Consentement explicite : case à cocher avant toute analyse faciale.
+
+Extraction seule : seuls les vecteurs mathématiques sont stockés.
+
+Suppression immédiate : le selfie est supprimé juste après extraction.
+
+Collections éphémères : suppression automatique 30 jours après l'événement.
+
+Pas de croisement : chaque événement a sa propre collection Qdrant isolée.
+
+Chiffrement : AES-256 au repos, clés gérées avec rotation.
+
+17.2 Droits des Utilisateurs
+Droit d'accès : consulter ses données.
+
+Droit de rectification : modifier les informations de profil.
+
+Droit à l'effacement : bouton "Supprimer mes données faciales", effacement sous 24h avec preuve.
+
+Droit à la portabilité : export des données sur demande.
+
+17.3 Conformité Réglementaire
+Déclaration à la Commission des Données Personnelles (CDP) du Sénégal.
+
+Conformité avec la Loi n°2008-12 sur la protection des données personnelles.
+
+Audit externe annuel du système biométrique.
+
+Journalisation de tous les accès aux données faciales.
+
+17.4 Politique de Conservation
+Type de donnée	Durée
+Selfie de recherche	Suppression immédiate
+Vecteurs faciaux	30 jours après événement
+Photos originales	Durée de l'abonnement
+Logs techniques	12 mois
+Logs d'audit	5 ans
+Données de paiement	10 ans
+PARTIE 7 — INFRASTRUCTURE
+18. INFRASTRUCTURE ET DÉPLOIEMENT
+18.1 MVP — Déploiement Initial
+Composant	Spécification
+Serveur principal	1 VPS (4 vCPU, 8 Go RAM) pour l'API et les workers légers
+Serveur Workers IA	1 VPS dédié (4 vCPU, 8 Go RAM) pour les traitements InsightFace
+PostgreSQL	Managé (DigitalOcean ou AWS RDS)
+Redis	Managé
+Qdrant	Self-hosted sur le serveur workers IA
+Stockage	Cloudflare R2
+Orchestration	Docker Compose
+Justification du serveur dédié pour les workers IA :
+
+Isoler les traitements CPU-intensifs de l'API.
+
+Éviter la saturation de l'API pendant les uploads massifs.
+
+Permettre un scaling indépendant des workers IA.
+
+18.2 Stratégie d'Évolution
+Phase	Infrastructure
+Phase 1	Docker Compose sur 2 VPS
+Phase 2	Migration vers Kubernetes, auto-scaling des workers IA
+Phase 3	Extraction des modules en microservices, base de données avec réplication, CDN multi-régions
+18.3 CI/CD
+Code source hébergé sur GitHub/GitLab.
+
+Pipeline CI/CD avec GitHub Actions : tests, linting, analyse de sécurité, build Docker, déploiement.
+
+Secrets gérés par HashiCorp Vault, injectés à l'exécution.
+
+19. PERFORMANCE ET OBJECTIFS DE SERVICE
+19.1 Objectifs de Performance
+Métrique	Objectif
+Upload de 1 000 photos	< 10 minutes
+Recherche par selfie	< 2 secondes
+Chargement d'une galerie	< 1 seconde
+Téléchargement HD	< 5 secondes
+Disponibilité API	99,9%
+Disponibilité Paiement	99,95%
+19.2 Objectifs de Qualité IA
+Métrique	Objectif
+Taux de vrais positifs (rappel)	> 95%
+Taux de faux positifs	< 1%
+Taux de faux négatifs	< 5%
+PARTIE 8 — CONCEPTION
+20. DESIGN SYSTEM ET MAQUETTES
+20.1 Palette de Couleurs
+Couleur	Code Hex	Usage
+Marron principal	#5D4037	Barres, boutons, titres
+Marron clair	#795548	Icônes, bordures
+Beige secondaire	#F5F0E8	Fond d'écran
+Beige foncé	#E8DCC8	Surbrillance, séparateurs
+Blanc	#FFFFFF	Fond cartes, texte sur foncé
+Vert olive	#6B8E23	Badges succès, prix, CTA
+Texte foncé	#3E2723	Texte principal
+Texte clair	#8D6E63	Texte secondaire
+20.2 Typographie
+Titres : Police sans-serif, graisse Bold.
+
+Corps : Police sans-serif, graisse Regular.
+
+Prix et données chiffrées : Graisse SemiBold.
+
+20.3 Rayons de Bordure
+Petit (badges, tags) : 8px.
+
+Moyen (cartes, champs) : 12px.
+
+Large (écrans, modales) : 16px.
+
+Boutons : 26px (complètement arrondis).
+
+Avatars : 28px (circulaires).
+
+20.4 Applications et Écrans
+ZoPic Photographe : 13 écrans
+
+Dashboard, création événement, upload, galeries, stockage, profil, abonnement, ventes, rétrocessions, notifications.
+
+ZoPic Photos : 8 écrans
+
+Modes de recherche, selfie, galerie résultats, panier, paiement, confirmation, téléchargement.
+
+20.5 Principes UX
+Selfie d'abord : présenté en premier, c'est le plus différenciant.
+
+Fallback systématique : dossard, équipe ou parcourir tout.
+
+Progressive Reveal : aperçu → HD sans rechargement.
+
+Achat invité : sans création de compte.
+
+Watermark visible : sur toutes les photos non achetées.
+
+Rassurance paiement : message explicatif en cas de latence.
+
+21. INDICATEURS CLÉS
+21.1 Métriques Produit
+Métrique	Cible 6 mois	Cible 12 mois	Cible 24 mois
+Photographes abonnés	100	200	500
+Taux de rétention	> 80%	> 85%	> 90%
+Événements/mois	200	400	1 000
+Photos uploadées/mois	100 000	250 000	1 000 000
+Photos vendues/mois	10 000	25 000	100 000
+Taux de conversion	10%	12%	15%
+Revenu brut mensuel	~2 500 000 FCFA	~6 400 000 FCFA	~21 500 000 FCFA
+21.2 Métriques Techniques
+Métrique	Cible
+Disponibilité API	99,9%
+Disponibilité Paiement	99,95%
+Temps de recherche faciale	P95 < 1 seconde
+Temps d'upload (hors transfert)	P95 < 3 secondes
+Temps de téléchargement HD	P95 < 5 secondes
+Taux d'erreur	< 1%
+22. ÉQUIPE RECOMMANDÉE
+Phase MVP (4 mois) — 5 personnes
+Rôle	Responsabilités
+Développeur Flutter	Applications mobiles ZoPic Photographe et ZoPic Photos
+Développeur React	Interfaces web pour les deux applications
+Développeur Backend Python	API FastAPI, workers, IA
+Designer UI/UX	Design system, maquettes, expérience utilisateur
+Chef de Projet / Product Owner	Coordination, priorisation, tests
+Compétences requises :
+
+Maîtrise de Flutter et Dart pour le mobile.
+
+Maîtrise de React, TypeScript et Vite pour le web.
+
+Maîtrise de Python, FastAPI, PostgreSQL et Redis pour le backend.
+
+Connaissance de base en traitement d'image et machine learning.
+
+Expérience en conception d'interfaces mobiles pour le marché africain.
+
+23. POINTS DE VIGILANCE ET SOLUTIONS
+Risque	Solution
+Saturation workers IA	Serveur dédié, files séparées, ia_realtime pour selfies
+Webhook paiement perdu	Idempotence, reconciliation toutes les 15 minutes
+Selfie non reconnu	Fallback dossard/équipe, contrôle qualité selfie
+Fuite mémoire ONNX	max_jobs=500, recyclage automatique
+Double rétrocession	SELECT FOR UPDATE SKIP LOCKED
+Fichiers orphelins R2	Soft delete, worker garbage collection
+Précision IA en conditions difficiles	Seuils configurables, feedback utilisateur, fallbacks
+PARTIE 9 — ANNEXES
+24. STRATÉGIE D'ABSTRACTION DES FOURNISSEURS
+Pour éviter la dépendance à un fournisseur unique, des interfaces d'abstraction sont documentées :
+
+Service	Fournisseur MVP	Alternatives
+Stockage	Cloudflare R2	AWS S3, MinIO, DigitalOcean Spaces
+Paiement	PayDunya	CinetPay, IntouchPay, API Wave directe
+SMS	Twilio	Infobip, Kalicom, API Orange Sénégal
+CDN	Cloudflare	Fastly, AWS CloudFront
+Approche :
+
+Le code backend utilisera des adaptateurs (pattern Adapter) pour chaque service externe.
+
+Facilite le remplacement sans modification de la logique métier.
+
+Documentation des interfaces pour chaque service.
+
+25. GLOSSAIRE
+Terme	Définition
+Arq	Bibliothèque Python de job queue basée sur Redis
+Bounding Box	Coordonnées spatiales d'un visage dans une image
+C2PA	Standard de certification de provenance des contenus numériques
+Client Proofing	Galerie privée permettant au client de liker et commenter
+Cloudflare R2	Stockage objet sans frais de transfert sortant
+Dead Letter Queue	File pour jobs échoués, inspection manuelle
+Egress	Frais de transfert de données sortant d'un cloud
+FastAPI	Framework web Python asynchrone pour API REST
+Flutter	Framework Google pour applications mobiles multiplateformes
+Idempotence	Opération qui produit le même résultat si appliquée plusieurs fois
+InsightFace	Bibliothèque open source de reconnaissance faciale
+Liveness Detection	Vérification qu'un selfie est pris par une personne réelle
+Monolithe Modulaire	Code organisé en modules, déployé comme un seul processus
+ONNX Runtime	Moteur d'inférence pour modèles de machine learning
+pHash	Empreinte perceptuelle d'une image
+Progressive Reveal	Transition aperçu → HD sans rechargement
+Qdrant	Base de données vectorielle
+Soft Delete	Suppression logique avec possibilité de restauration
+Tauri	Framework d'applications desktop légères (Rust + web)
+URL Présignée	URL temporaire d'accès direct à un fichier
+26. CONCLUSION
+Le présent document constitue la référence exhaustive et unique pour la conception, le développement et le lancement de ZoPic Studio. Il synthétise l'ensemble des décisions stratégiques, fonctionnelles, techniques et opérationnelles.
+
+Forces du Projet
+Adéquation au marché : réponse à un besoin réel et non satisfait au Sénégal et en Afrique.
+
+Modèle économique hybride : revenu récurrent (abonnements) et variable (commissions).
+
+Choix techniques pragmatiques : stack moderne, monolithe modulaire, extraction progressive.
+
+Souveraineté des données : IA on-premise, pas de dépendance cloud tierce.
+
+Sécurité by design : protection intégrée à tous les niveaux.
+
+UX pensée pour le marché local : selfie, Mobile Money, achat invité, fallbacks.
+
+Prochaines Étapes
+Mise en place de l'infrastructure de développement.
+
+Développement itératif en sprints de deux semaines.
+
+Tests utilisateurs avec un panel de photographes et sportifs.
+
+Lancement en bêta avec un groupe restreint.
+
+Lancement commercial.
+
+Ce document est la référence unique pour l'ensemble des parties prenantes du projet ZoPic Studio.

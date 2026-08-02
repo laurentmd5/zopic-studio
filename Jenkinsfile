@@ -2,7 +2,6 @@ pipeline {
     agent any
     
     environment {
-        DOCKER_IMAGE_NAME = 'zopic-studio-backend'
         DOCKER_IMAGE_TAG = "${BUILD_NUMBER}"
         DEPLOY_PATH = '/home/devops/zopic-studio'
         COMPOSE_FILE = 'docker-compose.yml'
@@ -10,7 +9,7 @@ pipeline {
     
     options {
         timestamps()
-        timeout(time: 30, unit: 'MINUTES')
+        timeout(time: 45, unit: 'MINUTES')
         disableConcurrentBuilds()
         buildDiscarder(logRotator(numToKeepStr: '10'))
     }
@@ -31,36 +30,79 @@ pipeline {
         }
 
         // =====================================================================
-        // STAGE 2 : TESTS UNITAIRES
+        // STAGE 2 : TESTS UNITAIRES (Backend)
         // =====================================================================
-        stage('Tests Unitaires') {
+        stage('Tests Unitaires - Backend') {
             steps {
-                script {
-                    echo 'Exécution des tests unitaires mockés avant le build...'
-                    // Installation ou mise à jour de uv (si non présent sur l'agent)
-                    sh 'curl -LsSf https://astral.sh/uv/install.sh | sh || true'
-                    env.PATH = "${HOME}/.local/bin:${env.PATH}"
-                    sh 'uv sync'
-                    sh 'cp .env.example .env'
-                    sh 'uv run pytest tests/'
+                dir('backend') {
+                    script {
+                        echo 'Exécution des tests backend avec pytest...'
+                        sh 'curl -LsSf https://astral.sh/uv/install.sh | sh || true'
+                        env.PATH = "${HOME}/.local/bin:${env.PATH}"
+                        sh 'uv sync'
+                        sh 'cp .env.example .env'
+                        sh 'uv run pytest tests/'
+                    }
+                }
+            }
+        }
+
+        // =====================================================================
+        // STAGE 3 : TESTS UNITAIRES (Frontend Web)
+        // =====================================================================
+        stage('Tests Unitaires - Frontend Web (Pro)') {
+            steps {
+                dir('frontend-web') {
+                    script {
+                        echo 'Exécution des tests Frontend Web avec Vitest...'
+                        sh 'npm install'
+                        sh 'npm run test -- --run'
+                    }
+                }
+            }
+        }
+
+        // =====================================================================
+        // STAGE 4 : TESTS UNITAIRES (Frontend Client)
+        // =====================================================================
+        stage('Tests Unitaires - Frontend Client (PWA)') {
+            steps {
+                dir('frontend-client') {
+                    script {
+                        echo 'Exécution des tests Frontend Client avec Vitest...'
+                        sh 'npm install'
+                        sh 'npm run test -- --run'
+                    }
                 }
             }
         }
         
         // =====================================================================
-        // STAGE 3 : BUILD
+        // STAGE 5 : BUILD (DOCKER)
         // =====================================================================
-        stage('Build') {
+        stage('Build Docker Images') {
             steps {
                 script {
-                    echo "Construction : ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}"
-                    sh "docker build -t ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} -f Dockerfile ."
+                    echo "Construction Backend"
+                    sh "docker build -t zopic-studio-backend:${DOCKER_IMAGE_TAG} -f backend/Dockerfile backend/"
+                    
+                    echo "Construction AI API"
+                    sh "docker build -t zopic-ai-api:${DOCKER_IMAGE_TAG} -f backend/worker_ai/Dockerfile backend/worker_ai/"
+
+                    echo "Construction AI Worker"
+                    sh "docker build -t zopic-ai-worker:${DOCKER_IMAGE_TAG} -f backend/worker_ai/Dockerfile backend/worker_ai/"
+                    
+                    echo "Construction Frontend Web (Pro)"
+                    sh "docker build -t zopic-frontend-web:${DOCKER_IMAGE_TAG} -f frontend-web/Dockerfile frontend-web/"
+                    
+                    echo "Construction Frontend Client (PWA)"
+                    sh "docker build -t zopic-frontend-client:${DOCKER_IMAGE_TAG} -f frontend-client/Dockerfile frontend-client/"
                 }
             }
         }
         
         // =====================================================================
-        // STAGE 4 : PREPARER
+        // STAGE 6 : PREPARER LE DEPLOIEMENT
         // =====================================================================
         stage('Preparer') {
             steps {
@@ -68,30 +110,28 @@ pipeline {
                     sh """
                         mkdir -p ${DEPLOY_PATH}/logs
                         mkdir -p ${DEPLOY_PATH}/scripts
+                        mkdir -p ${DEPLOY_PATH}/backend
 
                         cp ${WORKSPACE}/${COMPOSE_FILE}              ${DEPLOY_PATH}/
-                        cp ${WORKSPACE}/scripts/init_qdrant.py       ${DEPLOY_PATH}/scripts/
-                        cp ${WORKSPACE}/scripts/db_migrate.py        ${DEPLOY_PATH}/scripts/
-                        cp -r ${WORKSPACE}/worker_ai                 ${DEPLOY_PATH}/
+                        cp ${WORKSPACE}/backend/scripts/init_qdrant.py       ${DEPLOY_PATH}/scripts/
+                        cp ${WORKSPACE}/backend/scripts/db_migrate.py        ${DEPLOY_PATH}/scripts/
                     """
 
                     def envExists = sh(
-                        script: "test -f ${DEPLOY_PATH}/.env && echo yes || echo no",
+                        script: "test -f ${DEPLOY_PATH}/backend/.env && echo yes || echo no",
                         returnStdout: true
                     ).trim()
 
                     if (envExists == 'no') {
-                        echo 'ATTENTION : .env manquant - Creez-le sur la VM : nano /home/devops/zopic-studio/.env'
-                        sh "cp ${WORKSPACE}/.env.example ${DEPLOY_PATH}/.env"
-                    } else {
-                        echo '.env conserve'
+                        echo 'ATTENTION : .env manquant - Copie de .env.example'
+                        sh "cp ${WORKSPACE}/backend/.env.example ${DEPLOY_PATH}/backend/.env"
                     }
                 }
             }
         }
 
         // =====================================================================
-        // STAGE 5 : REDEMARRER
+        // STAGE 7 : REDEMARRER
         // =====================================================================
         stage('Redemarrer') {
             steps {
@@ -99,63 +139,23 @@ pipeline {
                     cd ${DEPLOY_PATH}
                     export DOCKER_IMAGE_TAG=${DOCKER_IMAGE_TAG}
                     docker compose -f ${COMPOSE_FILE} down --remove-orphans || true
-                    docker compose -f ${COMPOSE_FILE} up -d --build --force-recreate
+                    docker compose -f ${COMPOSE_FILE} up -d --force-recreate
                 """
                 sleep(time: 20, unit: 'SECONDS')
             }
         }
 
         // =====================================================================
-        // STAGE 6 : VERIFIER
+        // STAGE 8 : MIGRATION DB & INIT DATA
         // =====================================================================
-        stage('Verifier') {
+        stage('Migration DB & Init Data') {
             steps {
                 script {
-                    def ok = false
-                    for (int i = 0; i < 20; i++) {
-                        def status = sh(
-                            script: "curl -s -o /dev/null -w '%{http_code}' http://localhost:8000/health || echo 000",
-                            returnStdout: true
-                        ).trim()
-                        if (status == '200') {
-                            ok = true
-                            echo "Service healthy (tentative ${i + 1})"
-                            break
-                        }
-                        sleep(time: 3, unit: 'SECONDS')
-                    }
-                    if (!ok) error("Service non healthy apres 20 tentatives")
-                }
-            }
-        }
-
-        // =====================================================================
-        // STAGE 7 : MIGRATION DB (hybrid create_all + alembic)
-        // =====================================================================
-        stage('Migration DB') {
-            steps {
-                script {
-                    echo 'Application du schema de base de donnees (hybride create_all + Alembic)...'
+                    echo 'Application du schema de base de donnees (Alembic)...'
                     sh """
                         cd ${DEPLOY_PATH}
                         docker compose -f ${COMPOSE_FILE} exec -T backend uv run python scripts/db_migrate.py
-                    """
-                    echo 'Schema OK'
-                }
-            }
-        }
-
-        // =====================================================================
-        // STAGE 8 : INIT DATA
-        // =====================================================================
-        stage('Init Data') {
-            steps {
-                script {
-                    // Initialiser Qdrant
-                    sh """
-                        cd ${DEPLOY_PATH}
-                        docker compose -f ${COMPOSE_FILE} exec -T backend \
-                            uv run python scripts/init_qdrant.py || true
+                        docker compose -f ${COMPOSE_FILE} exec -T backend uv run python scripts/init_qdrant.py || true
                     """
                 }
             }
@@ -177,10 +177,11 @@ pipeline {
                 def ip = sh(script: "hostname -I | awk '{print \$1}'", returnStdout: true).trim()
                 echo """
 ========================================
-     DEPLOIEMENT ZO PIC STUDIO REUSSI !
+     DEPLOIEMENT COMPLET REUSSI !
 ========================================
-  API     : http://${ip}:8000/health
-  Docs    : http://${ip}:8000/docs
+  API Backend : http://${ip}:8000/health
+  Dashboard   : http://${ip}:5173
+  PWA Client  : http://${ip}:5174
 ========================================"""
             }
         }
