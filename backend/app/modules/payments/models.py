@@ -16,6 +16,7 @@ class Order(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True) # Nullable for guest checkout
+    session_id = Column(String, index=True, nullable=True) # For guest sessions
     total_amount = Column(Integer, nullable=False) # En FCFA
     status = Column(String, default=OrderStatus.PENDING)
     paydunya_token = Column(String, unique=True, nullable=True)

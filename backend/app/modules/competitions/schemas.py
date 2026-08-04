@@ -35,6 +35,11 @@ class EpreuveResponse(EpreuveBase):
     model_config = ConfigDict(from_attributes=True)
 
 # Competition Schemas
+class PackConfig(BaseModel):
+    quantity: int
+    price_xof: int
+    label: str
+
 class CompetitionBase(BaseModel):
     name: str
     description: Optional[str] = None
@@ -42,6 +47,12 @@ class CompetitionBase(BaseModel):
     is_public: bool = True
     access_code: Optional[str] = None
     settings: Optional[dict] = {}
+    packs_enabled: bool = False
+    packs: Optional[List[PackConfig]] = None
+
+class CompetitionPacksUpdate(BaseModel):
+    packs_enabled: bool
+    packs: List[PackConfig]
 
 class CompetitionCreate(CompetitionBase):
     pass

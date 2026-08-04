@@ -24,7 +24,22 @@ async def generate_watermark(ctx, photo_id: int, original_key: str, watermark_ke
         
         # Add watermark text
         draw = ImageDraw.Draw(image)
-        text = "ZoPic Studio - PREVIEW"
+        
+        # 2.5 Query photographer name
+        photographer_name = "ZoPic Studio"
+        engine = create_async_engine(settings.DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://") if settings.DATABASE_URL.startswith("postgresql://") else settings.DATABASE_URL)
+        async_session = async_sessionmaker(engine, expire_on_commit=False)
+        async with async_session() as session:
+            from sqlalchemy.future import select
+            from app.modules.competitions.models import Photo, Epreuve, Competition
+            from app.modules.auth.models import User
+            query = select(User.full_name).join(Competition, Competition.photographer_id == User.id).join(Epreuve, Epreuve.competition_id == Competition.id).join(Photo, Photo.epreuve_id == Epreuve.id).where(Photo.id == photo_id)
+            result = await session.execute(query)
+            full_name = result.scalar_one_or_none()
+            if full_name:
+                photographer_name = full_name
+        
+        text = f"Aperçu — ZoPic Studio | {photographer_name}"
         
         # Simple watermark top-left (MVP)
         draw.text((20, 20), text, fill=(255, 255, 255, 180))

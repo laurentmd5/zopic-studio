@@ -68,7 +68,65 @@ async def extract_faces(ctx, photo_id: int, event_id: int, album_id: int, origin
         print(f"Erreur lors de l'extraction de la photo {photo_id}: {e}")
         return False
 
+import zipfile
+import io
+import aiohttp
+
+async def generate_zip(ctx, archive_id: int, s3_keys: list[str], callback_url: str):
+    print(f"Generation de l'archive ZIP {archive_id} pour {len(s3_keys)} fichiers...")
+    
+    try:
+        session = aioboto3.Session()
+        zip_buffer = io.BytesIO()
+        
+        async with session.client(
+            's3',
+            endpoint_url=S3_ENDPOINT_URL,
+            aws_access_key_id=S3_ACCESS_KEY,
+            aws_secret_access_key=S3_SECRET_KEY,
+            region_name="us-east-1"
+        ) as s3:
+            
+            with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+                for key in s3_keys:
+                    try:
+                        response = await s3.get_object(Bucket=S3_BUCKET_NAME, Key=key)
+                        file_data = await response['Body'].read()
+                        filename = key.split('/')[-1]
+                        zip_file.writestr(filename, file_data)
+                    except Exception as e:
+                        print(f"Erreur lors du telechargement de {key}: {e}")
+            
+            zip_buffer.seek(0)
+            zip_key = f"archives/archive_{archive_id}.zip"
+            
+            await s3.put_object(
+                Bucket=S3_BUCKET_NAME,
+                Key=zip_key,
+                Body=zip_buffer.getvalue(),
+                ContentType='application/zip'
+            )
+            
+            # Notify backend
+            async with aiohttp.ClientSession() as http_session:
+                await http_session.post(
+                    callback_url,
+                    json={"status": "COMPLETED", "s3_object_key": zip_key, "size": len(zip_buffer.getvalue())}
+                )
+                
+            print(f"Archive {archive_id} generee avec succes: {zip_key}")
+            return True
+            
+    except Exception as e:
+        print(f"Erreur lors de la generation de l'archive {archive_id}: {e}")
+        async with aiohttp.ClientSession() as http_session:
+            await http_session.post(
+                callback_url,
+                json={"status": "FAILED"}
+            )
+        return False
+
 class WorkerSettings:
     redis_settings = RedisSettings.from_dsn(REDIS_URL)
-    functions = [extract_faces]
+    functions = [extract_faces, generate_zip]
     queue_name = 'arq:ai_queue' # On utilise une queue diffÃ©rente pour l'IA

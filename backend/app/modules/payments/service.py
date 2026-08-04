@@ -6,7 +6,10 @@ from app.modules.payments.schemas import OrderCreate, OrderResponse
 from app.modules.payments.paydunya_client import paydunya_client
 from app.modules.competitions.models import Photo, Epreuve, Competition
 
-async def create_order(db: AsyncSession, order_data: OrderCreate, user_id: int = None) -> OrderResponse:
+from app.core.events import event_bus
+from app.modules.payments.events import PaymentCompletedEvent
+
+async def create_order(db: AsyncSession, order_data: OrderCreate, user_id: int = None, session_id: str = None) -> OrderResponse:
     # 1. RÃ©cupÃ©rer toutes les photos pour calculer le total
     result = await db.execute(select(Photo).where(Photo.id.in_(order_data.photo_ids)))
     photos = result.scalars().all()
@@ -27,25 +30,59 @@ async def create_order(db: AsyncSession, order_data: OrderCreate, user_id: int =
     
     order_items = []
     
+    # Group photos by competition to apply packs
+    photos_by_comp = {}
     for photo in photos:
         epreuve = epreuves[photo.epreuve_id]
-        competition = competitions[epreuve.competition_id]
+        comp_id = epreuve.competition_id
+        if comp_id not in photos_by_comp:
+            photos_by_comp[comp_id] = []
+        photos_by_comp[comp_id].append(photo)
         
-        # Supposons qu'il y ait une colonne price_per_photo dans Competition
-        # Sinon, pour le MVP, on utilise un prix fixe de 500 FCFA
-        price = getattr(competition, 'price_per_photo', 500)
+    for comp_id, comp_photos in photos_by_comp.items():
+        competition = competitions[comp_id]
         
-        total_amount += price
+        # Determine unit price (from settings or fallback)
+        settings = competition.settings or {}
+        unit_price = settings.get("price_xof", 1500)
         
-        item = OrderItem(
-            photo_id=photo.id,
-            price=price
-        )
-        order_items.append(item)
+        photo_count = len(comp_photos)
+        comp_total = 0
+        
+        # Apply packs greedy logic
+        if getattr(competition, "packs_enabled", False) and getattr(competition, "packs", None):
+            packs = sorted(competition.packs, key=lambda x: x.get("quantity", 0), reverse=True)
+            remaining_photos = photo_count
+            for pack in packs:
+                q = pack.get("quantity", 0)
+                p = pack.get("price_xof", 0)
+                if q > 0:
+                    num_packs = remaining_photos // q
+                    comp_total += num_packs * p
+                    remaining_photos -= num_packs * q
+            comp_total += remaining_photos * unit_price
+        else:
+            comp_total = photo_count * unit_price
+            
+        total_amount += comp_total
+        
+        # For simplicity in OrderItem, distribute the total evenly or just use 0 for some
+        # We will just assign the average price to each item for the ledger
+        avg_price = comp_total / photo_count if photo_count > 0 else 0
+        for photo in comp_photos:
+            item = OrderItem(
+                photo_id=photo.id,
+                price=avg_price
+            )
+            order_items.append(item)
+            
+    if total_amount != order_data.amount_expected:
+        raise HTTPException(status_code=400, detail=f"Montant transmis invalide. Attendu: {total_amount}, Reçu: {order_data.amount_expected}")
     
-    # 2. CrÃ©er la commande
+    # 2. Créer la commande
     order = Order(
         user_id=user_id,
+        session_id=session_id,
         total_amount=total_amount,
         status=OrderStatus.PENDING
     )
@@ -117,12 +154,22 @@ async def process_webhook(db: AsyncSession, token: str, is_success: bool = True)
         
         sale = PhotoSale(
             order_item_id=item.id,
-            photographer_id=competition.user_id,
+            photographer_id=competition.photographer_id,
             amount_total=item.price,
             amount_photographer=amount_photographer,
+
             amount_platform=amount_platform
         )
         db.add(sale)
         
     await db.commit()
+    
+    # 4. Émettre l'événement métier
+    event = PaymentCompletedEvent(
+        order_id=order.id,
+        session_id=order.session_id,
+        user_id=order.user_id
+    )
+    await event_bus.publish(event)
+    
     return {"status": "paid_recorded_and_ledger_created"}

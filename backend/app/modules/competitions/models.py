@@ -30,6 +30,10 @@ class Competition(Base):
     # We will just use String for now if JSON is complex, or JSON.
     settings = Column(JSON, nullable=True, default={})
     
+    # Packs configuration
+    packs_enabled = Column(Boolean, default=False)
+    packs = Column(JSON, nullable=True)
+    
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     # Relationships
@@ -64,3 +68,17 @@ class Photo(Base):
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     epreuve = relationship("Epreuve", back_populates="photos")
+    favorites = relationship("Favorite", back_populates="photo", cascade="all, delete-orphan")
+
+class Favorite(Base):
+    __tablename__ = "favorites"
+
+    id = Column(Integer, primary_key=True, index=True)
+    session_id = Column(String, index=True, nullable=True) # For guest users (UUID)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True) # For authenticated athletes
+    photo_id = Column(Integer, ForeignKey("photos.id"), nullable=False)
+    
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+    photo = relationship("Photo", back_populates="favorites")
+    user = relationship("User", backref="favorites")

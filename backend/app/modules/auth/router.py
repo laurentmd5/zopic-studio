@@ -14,8 +14,14 @@ async def request_otp(data: OTPRequest, db: AsyncSession = Depends(get_db)):
     await service.generate_and_send_otp(db, data.phone_number)
     return {"message": "OTP sent successfully"}
 
+from fastapi import Header
+
 @router.post("/verify")
-async def verify_otp(data: OTPVerify, db: AsyncSession = Depends(get_db)) -> Token:
+async def verify_otp(
+    data: OTPVerify, 
+    x_session_id: str | None = Header(None),
+    db: AsyncSession = Depends(get_db)
+) -> Token:
     result = await service.verify_otp_and_login(db, data.phone_number, data.code)
     if not result:
         raise HTTPException(
@@ -23,6 +29,12 @@ async def verify_otp(data: OTPVerify, db: AsyncSession = Depends(get_db)) -> Tok
             detail="Invalid or expired OTP code",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    
+    # Trigger guest merging if session_id is present
+    if x_session_id:
+        from app.modules.athletes.services import merge_guest_orders
+        await merge_guest_orders(db, result["user_id"], x_session_id)
+        
     return Token(**result)
 
 @router.get("/me", response_model=UserResponse)

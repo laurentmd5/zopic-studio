@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Meta SEO & Open Graph injectées dynamiquement par FastAPI -->
+    <title>{{ title }}</title>
+    <meta name="description" content="{{ description }}">
+    
+    <meta property="og:title" content="{{ title }}">
+    <meta property="og:description" content="{{ description }}">
+    <meta property="og:image" content="{{ og_image }}">
+    <meta property="og:url" content="{{ url }}">
+    <meta property="og:type" content="profile">
+    
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ title }}">
+    <meta name="twitter:description" content="{{ description }}">
+    <meta name="twitter:image" content="{{ og_image }}">
+    
+    {% if json_ld %}
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+      {{ json_ld | safe }}
+    </script>
+    {% endif %}
+
+    <!-- Hydratation du PWA Client -->
+    <!-- En développement, on pointe sur le serveur Vite -->
+    <script type="module" src="http://localhost:5173/@vite/client"></script>
+    <script type="module" src="http://localhost:5173/src/main.tsx"></script>
+  </head>
+  <body>
+    <!-- Rendu statique pour robots si JS inactif (très rare aujourd'hui, mais utile) -->
+    <noscript>
+      <h1>{{ title }}</h1>
+      <p>{{ description }}</p>
+      {% if og_image %}
+      <img src="{{ og_image }}" alt="Cover">
+      {% endif %}
+    </noscript>
+    
+    <div id="root"></div>
+  </body>
+</html>

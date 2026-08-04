@@ -4,6 +4,7 @@ from .models import OrderStatus
 
 class OrderCreate(BaseModel):
     photo_ids: List[int]
+    amount_expected: int
     cancel_url: str = "http://localhost:3000/cancel"
     return_url: str = "http://localhost:3000/success"
 

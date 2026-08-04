@@ -46,3 +46,33 @@ async def create_epreuve(competition_id: int, epreuve: schemas.EpreuveCreate, db
 async def add_photo_to_album(epreuve_id: int, photo: schemas.PhotoCreate, db: AsyncSession = Depends(get_db)):
     # Ajouter la photo (qui a Ã©tÃ© uploadÃ©e via Presigned URL) Ã  la BDD
     return await service.add_photo(db, epreuve_id, photo)
+
+@router.put("/{competition_id}/packs", response_model=schemas.CompetitionResponse)
+async def update_competition_packs(
+    competition_id: int, 
+    packs_update: schemas.CompetitionPacksUpdate, 
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    competition = await service.get_competition(db, competition_id)
+    if not competition:
+        raise HTTPException(status_code=404, detail="Competition not found")
+    if competition.photographer_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to edit this competition")
+        
+    competition.packs_enabled = packs_update.packs_enabled
+    # Convert Pydantic models to dict for JSON serialization
+    competition.packs = [pack.model_dump() for pack in packs_update.packs]
+    
+    await db.commit()
+    return await service.get_competition(db, competition_id)
+
+@router.get("/{competition_id}/packs")
+async def get_competition_packs(competition_id: int, db: AsyncSession = Depends(get_db)):
+    competition = await service.get_competition(db, competition_id)
+    if not competition:
+        raise HTTPException(status_code=404, detail="Competition not found")
+    return {
+        "packs_enabled": competition.packs_enabled,
+        "packs": competition.packs or []
+    }

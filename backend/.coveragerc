@@ -1,0 +1,10 @@
+[run]
+source = app/
+omit =
+    app/main.py
+    app/core/*
+    app/db/*
+
+[report]
+fail_under = 100
+show_missing = True

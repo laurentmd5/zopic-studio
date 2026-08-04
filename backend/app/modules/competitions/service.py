@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from app.modules.competitions.models import Competition, Epreuve, Photo, PhotoStatus
 from app.modules.competitions import schemas
 from arq import create_pool
@@ -25,7 +26,7 @@ async def get_competitions(db: AsyncSession, skip: int = 0, limit: int = 100):
     return result.scalars().all()
 
 async def get_competition(db: AsyncSession, competition_id: int):
-    result = await db.execute(select(Competition).where(Competition.id == competition_id))
+    result = await db.execute(select(Competition).options(selectinload(Competition.epreuves)).where(Competition.id == competition_id))
     return result.scalars().first()
 
 async def create_epreuve(db: AsyncSession, competition_id: int, epreuve_data: schemas.EpreuveCreate) -> Epreuve:

@@ -1,86 +1,91 @@
 import pytest
-from unittest.mock import AsyncMock, patch, MagicMock
-from fastapi import HTTPException
 from app.modules.payments import service, schemas
-from app.modules.payments.models import OrderStatus
+from app.modules.payments.models import OrderStatus, Order
+from app.modules.competitions.models import Photo, Epreuve, Competition
+from app.modules.auth.models import User
+from unittest.mock import patch, AsyncMock
 
 @pytest.mark.asyncio
-async def test_create_order():
-    mock_db = AsyncMock()
+async def test_create_order_with_packs(db_session):
+    # Setup test data
+    user = User(phone_number="+221770000000")
+    db_session.add(user)
+    await db_session.commit()
     
-    # Mock des rÃ©sultats de requÃªtes DB
-    # 1. Photos
-    mock_photo = MagicMock(id=1, epreuve_id=10)
-    mock_photo_result = MagicMock()
-    mock_photo_scalars = MagicMock()
-    mock_photo_scalars.all.return_value = [mock_photo]
-    mock_photo_result.scalars.return_value = mock_photo_scalars
+    from datetime import datetime, timezone
+    comp = Competition(
+        name="Test Event", 
+        date=datetime.now(timezone.utc),
+        photographer_id=user.id,
+        settings={"price_xof": 1500},
+        packs_enabled=True,
+        packs=[
+            {"quantity": 5, "price_xof": 5000, "label": "5 photos"},
+            {"quantity": 10, "price_xof": 8000, "label": "10 photos"}
+        ]
+    )
+    db_session.add(comp)
+    await db_session.commit()
     
-    # 2. Epreuves
-    mock_epreuve = MagicMock(id=10, competition_id=100)
-    mock_epreuve_result = MagicMock()
-    mock_epreuve_scalars = MagicMock()
-    mock_epreuve_scalars.all.return_value = [mock_epreuve]
-    mock_epreuve_result.scalars.return_value = mock_epreuve_scalars
+    epreuve = Epreuve(name="Epreuve 1", competition_id=comp.id)
+    db_session.add(epreuve)
+    await db_session.commit()
     
-    # 3. Competitions
-    mock_competition = MagicMock(id=100, user_id=99, price_per_photo=1000)
-    mock_competition_result = MagicMock()
-    mock_competition_scalars = MagicMock()
-    mock_competition_scalars.all.return_value = [mock_competition]
-    mock_competition_result.scalars.return_value = mock_competition_scalars
+    # Add 7 photos (Expect 1 pack of 5 = 5000 + 2 unit = 3000 -> Total 8000)
+    photos = []
+    for i in range(7):
+        p = Photo(epreuve_id=epreuve.id, s3_object_key=f"url_{i}")
+        db_session.add(p)
+        photos.append(p)
+    await db_session.commit()
     
-    mock_db.execute.side_effect = [
-        mock_photo_result, # fetch photos
-        mock_epreuve_result, # fetch epreuves
-        mock_competition_result  # fetch competitions
-    ]
+    photo_ids = [p.id for p in photos]
+    order_data = schemas.OrderCreate(photo_ids=photo_ids, amount_expected=8000)
     
-    order_data = schemas.OrderCreate(photo_ids=[1])
-    
-    with patch('app.modules.payments.paydunya_client.PayDunyaClient.create_invoice', new_callable=AsyncMock) as mock_create_invoice:
-        mock_create_invoice.return_value = {
-            "token": "tok_123",
-            "payment_url": "http://localhost/pay"
-        }
+    # Mock PayDunya
+    with patch('app.modules.payments.paydunya_client.PayDunyaClient.create_invoice', new_callable=AsyncMock) as mock_invoice:
+        mock_invoice.return_value = {"token": "test_tok", "payment_url": "http://test"}
         
-        async def mock_refresh(instance):
-            instance.id = 1
-        mock_db.refresh.side_effect = mock_refresh
+        response = await service.create_order(db_session, order_data, user_id=None, session_id="sess_123")
         
-        response = await service.create_order(mock_db, order_data, user_id=5)
+        assert response.total_amount == 8000
+        assert response.paydunya_token == "test_tok"
         
-        assert response.total_amount == 1000
-        assert response.paydunya_token == "tok_123"
-        mock_create_invoice.assert_awaited_once_with(
-            amount=1000,
-            order_id=mock_db.add.call_args_list[0][0][0].id, # L'order mockÃ©
-            cancel_url=order_data.cancel_url,
-            return_url=order_data.return_url
-        )
+        # Verify DB Order
+        from sqlalchemy.future import select
+        res = await db_session.execute(select(Order).where(Order.id == response.order_id))
+        order = res.scalars().first()
+        
+        assert order.session_id == "sess_123"
+        assert order.total_amount == 8000
+        assert order.status == OrderStatus.PENDING
 
 @pytest.mark.asyncio
-async def test_process_webhook_success():
-    mock_db = AsyncMock()
+async def test_process_webhook_emits_event(db_session):
+    # Setup Order
+    order = Order(
+        total_amount=1500,
+        status=OrderStatus.PENDING,
+        paydunya_token="webhook_tok",
+        session_id="sess_456"
+    )
+    db_session.add(order)
+    await db_session.commit()
     
-    mock_order = MagicMock(id=1, status=OrderStatus.PENDING)
-    
-    mock_order_result = MagicMock()
-    mock_order_scalars = MagicMock()
-    mock_order_scalars.first.return_value = mock_order
-    mock_order_result.scalars.return_value = mock_order_scalars
-    
-    mock_items_result = MagicMock()
-    mock_items_scalars = MagicMock()
-    mock_items_scalars.all.return_value = []
-    mock_items_result.scalars.return_value = mock_items_scalars
-    
-    mock_db.execute.side_effect = [
-        mock_order_result, # fetch order
-        mock_items_result, # fetch order items
-    ]
-    
-    result = await service.process_webhook(mock_db, "tok_123", True)
-    
-    assert mock_order.status == OrderStatus.PAID
-    assert result["status"] == "paid_recorded_and_ledger_created"
+    # Mock event bus
+    with patch('app.modules.payments.service.event_bus.publish', new_callable=AsyncMock) as mock_publish:
+        result = await service.process_webhook(db_session, "webhook_tok", is_success=True)
+        
+        assert result["status"] == "paid_recorded_and_ledger_created"
+        
+        from sqlalchemy.future import select
+        res = await db_session.execute(select(Order).where(Order.id == order.id))
+        updated_order = res.scalars().first()
+        
+        assert updated_order.status == OrderStatus.PAID
+        
+        # Check event emitted
+        assert mock_publish.call_count == 1
+        event = mock_publish.call_args[0][0]
+        assert event.order_id == order.id
+        assert event.session_id == "sess_456"
