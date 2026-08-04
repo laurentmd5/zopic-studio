@@ -1,6 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom'
-import { Calendar, MapPin, Trophy } from 'lucide-react'
-import { useEffect, useState } from 'react'
+
 
 export default function CompetitionPage() {
   const navigate = useNavigate()

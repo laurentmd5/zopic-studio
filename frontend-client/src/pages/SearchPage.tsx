@@ -6,7 +6,7 @@ import { useCartStore } from '../store/cartStore'
 
 export default function SearchPage() {
   const navigate = useNavigate()
-  const { id } = useParams()
+  useParams()
   const { state, results, setSearchState, setResults } = useSearchStore()
   const { addItem, removeItem, items, total } = useCartStore()
 

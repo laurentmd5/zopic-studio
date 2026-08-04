@@ -1,4 +1,5 @@
-import { describe, it, expect, beforeEach, vi, Mock } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { useTimelineStore } from './timelineStore';
 import axios from 'axios';
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { identityApi } from '../../api/identity';
 import type { PublicAthleteProfile } from '../../api/identity';
-import { Save, Loader2, ArrowLeft, Camera, Plus, X } from 'lucide-react';
+import { Save, ArrowLeft, Camera, Plus, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const EditIdentityPage: React.FC = () => {

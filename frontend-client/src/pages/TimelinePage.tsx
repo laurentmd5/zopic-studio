@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, ChevronDown, ChevronRight, RefreshCcw, Camera, MapPin, Calendar as CalendarIcon } from 'lucide-react'
 import { useTimelineStore } from '../store/timelineStore'
 

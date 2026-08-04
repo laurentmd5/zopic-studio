@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, Mock } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
+import type { Mock } from 'vitest'
 import { competitionsService, storageService } from './competitionsService'
 import { api } from './api'
 

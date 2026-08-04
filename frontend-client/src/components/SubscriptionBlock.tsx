@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Check, Star, Shield } from 'lucide-react';
 
 interface Plan {
