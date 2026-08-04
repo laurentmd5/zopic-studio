@@ -85,7 +85,7 @@ services:
     image: zopic-ai-worker:${DOCKER_IMAGE_TAG:-latest}
     container_name: zopic_ai_worker
     restart: always
-    command: uv run arq app.worker.WorkerSettings
+    command: arq app.worker.WorkerSettings
     depends_on:
       - redis
       - minio
