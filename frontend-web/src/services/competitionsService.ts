@@ -26,13 +26,18 @@ export const competitionsService = {
     return response.data
   },
 
-  createÉpreuve: async (eventId: string | number, name: string) => {
-    const response = await api.post(`/competitions/${eventId}/epreuves`, { name })
+  createÉpreuve: async (competitionId: number, name: string) => {
+    const response = await api.post(`/competitions/${competitionId}/epreuves`, { name })
     return response.data
   },
 
-  addPhotoToÉpreuve: async (albumId: string | number, s3_object_key: string) => {
-    const response = await api.post(`/competitions/epreuves/${albumId}/photos`, { s3_object_key })
+  addPhotoToÉpreuve: async (epreuveId: number, objectKey: string) => {
+    const response = await api.post(`/competitions/epreuves/${epreuveId}/photos`, { s3_object_key: objectKey })
+    return response.data
+  },
+
+  updateCompetitionPacks: async (competitionId: number, packs_enabled: boolean, packs: any[]) => {
+    const response = await api.put(`/competitions/${competitionId}/packs`, { packs_enabled, packs })
     return response.data
   }
 }

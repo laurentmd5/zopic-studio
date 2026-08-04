@@ -8,7 +8,7 @@ import PhotoLightbox from '../components/common/PhotoLightbox'
 import styles from './CompetitionDetail.module.css'
 
 const CompetitionDetail: React.FC = () => {
-  const { eventId } = useParams<{ eventId: string }>()
+  const { competitionId } = useParams<{ competitionId: string }>()
   const [competition, setEvent] = useState<any>(null)
   const [photos, setPhotos] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -21,18 +21,25 @@ const CompetitionDetail: React.FC = () => {
 
   // Lightbox State
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+  
+  // Settings Modal State
+  const [showSettingsModal, setShowSettingsModal] = useState(false)
+  const [packsEnabled, setPacksEnabled] = useState(false)
+  const [packsConfig, setPacksConfig] = useState<any[]>([])
 
   useEffect(() => {
-    if (eventId) {
+    if (competitionId) {
       fetchEventDetails()
     }
-  }, [eventId])
+  }, [competitionId])
 
   const fetchEventDetails = async () => {
     try {
       setLoading(true)
-      const data = await competitionsService.getEventDetails(eventId!)
+      const data = await competitionsService.getEventDetails(competitionId!)
       setEvent(data)
+      setPacksEnabled(data.packs_enabled || false)
+      setPacksConfig(data.packs || [])
       const allPhotos = data.epreuves?.flatMap((a: any) => a.photos) || []
       setPhotos(allPhotos)
     } catch (error) {
@@ -126,6 +133,23 @@ const CompetitionDetail: React.FC = () => {
     })
   }
 
+  const handleSaveSettings = async () => {
+    try {
+      await toast.promise(
+        competitionsService.updateCompetitionPacks(competition.id, packsEnabled, packsConfig),
+        {
+          loading: 'Sauvegarde des paramètres...',
+          success: 'Paramètres mis à jour',
+          error: 'Erreur de sauvegarde'
+        }
+      )
+      setShowSettingsModal(false)
+      fetchEventDetails()
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
     toast.success('Lien copié dans le presse-papiers !')
@@ -155,7 +179,7 @@ const CompetitionDetail: React.FC = () => {
         </div>
         
         <div className={styles.actions}>
-          <button className={styles.secondaryBtn}>
+          <button className={styles.secondaryBtn} onClick={() => setShowSettingsModal(true)}>
             <Settings size={18} />
             <span>Paramètres</span>
           </button>
@@ -304,6 +328,93 @@ const CompetitionDetail: React.FC = () => {
             
             <div className={styles.modalActions}>
               <button type="button" className={styles.primaryBtn} style={{width: '100%'}} onClick={() => setShowPublishModal(false)}>Fermer</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showSettingsModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modal} style={{ maxWidth: '600px' }}>
+            <div className={styles.modalHeader}>
+              <h3>Paramètres de la compétition</h3>
+              <button className={styles.closeBtn} onClick={() => setShowSettingsModal(false)}>×</button>
+            </div>
+            
+            <div className={styles.publishContent}>
+              <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <label style={{ fontWeight: 'bold' }}>Activer les Packs de photos</label>
+                <input 
+                  type="checkbox" 
+                  checked={packsEnabled} 
+                  onChange={(e) => setPacksEnabled(e.target.checked)}
+                  style={{ width: '20px', height: '20px' }}
+                />
+              </div>
+
+              {packsEnabled && (
+                <div>
+                  <h4 style={{ marginBottom: '1rem' }}>Configuration des Packs</h4>
+                  {packsConfig.map((pack, index) => (
+                    <div key={index} style={{ display: 'flex', gap: '10px', marginBottom: '10px', alignItems: 'center' }}>
+                      <input 
+                        type="number" 
+                        placeholder="Quantité (ex: 5)" 
+                        value={pack.quantity}
+                        onChange={(e) => {
+                          const newConfig = [...packsConfig]
+                          newConfig[index].quantity = parseInt(e.target.value) || 0
+                          setPacksConfig(newConfig)
+                        }}
+                        style={{ padding: '8px', borderRadius: '4px', border: '1px solid var(--color-border)', flex: 1 }}
+                      />
+                      <input 
+                        type="number" 
+                        placeholder="Prix XOF (ex: 2000)" 
+                        value={pack.price_xof}
+                        onChange={(e) => {
+                          const newConfig = [...packsConfig]
+                          newConfig[index].price_xof = parseInt(e.target.value) || 0
+                          setPacksConfig(newConfig)
+                        }}
+                        style={{ padding: '8px', borderRadius: '4px', border: '1px solid var(--color-border)', flex: 1 }}
+                      />
+                      <input 
+                        type="text" 
+                        placeholder="Label (ex: 5 photos)" 
+                        value={pack.label}
+                        onChange={(e) => {
+                          const newConfig = [...packsConfig]
+                          newConfig[index].label = e.target.value
+                          setPacksConfig(newConfig)
+                        }}
+                        style={{ padding: '8px', borderRadius: '4px', border: '1px solid var(--color-border)', flex: 1 }}
+                      />
+                      <button 
+                        onClick={() => {
+                          const newConfig = packsConfig.filter((_, i) => i !== index)
+                          setPacksConfig(newConfig)
+                        }}
+                        style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}
+                      >
+                        <Trash2 size={20} />
+                      </button>
+                    </div>
+                  ))}
+                  <button 
+                    onClick={() => setPacksConfig([...packsConfig, { quantity: 0, price_xof: 0, label: '' }])}
+                    className={styles.secondaryBtn}
+                    style={{ marginTop: '10px' }}
+                  >
+                    <Plus size={16} /> Ajouter un pack
+                  </button>
+                </div>
+              )}
+            </div>
+            
+            <div className={styles.modalActions}>
+              <button type="button" className={styles.secondaryBtn} onClick={() => setShowSettingsModal(false)}>Annuler</button>
+              <button type="button" className={styles.primaryBtn} onClick={handleSaveSettings}>Sauvegarder</button>
             </div>
           </div>
         </div>
