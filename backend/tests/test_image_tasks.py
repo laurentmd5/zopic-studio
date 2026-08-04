@@ -8,6 +8,7 @@ from app.modules.competitions.models import PhotoStatus
 @patch("app.workers.image_tasks.s3_client")
 @patch("app.workers.image_tasks.Image.open")
 async def test_generate_watermark_success(mock_img_open, mock_s3_client, mock_engine):
+    mock_engine.return_value.dispose = AsyncMock()
     # Mock Image
     mock_img = MagicMock()
     mock_img_open.return_value = mock_img
@@ -54,6 +55,7 @@ async def test_generate_watermark_success(mock_img_open, mock_s3_client, mock_en
 @patch("app.workers.image_tasks.create_async_engine")
 @patch("app.workers.image_tasks.s3_client")
 async def test_generate_watermark_failure(mock_s3_client, mock_engine):
+    mock_engine.return_value.dispose = AsyncMock()
     # Mock S3 Client to raise an exception
     mock_s3 = AsyncMock()
     mock_s3.get_object.side_effect = Exception("S3 error")

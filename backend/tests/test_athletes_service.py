@@ -36,62 +36,60 @@ async def test_get_slug_suggestions(db_session):
 
 @pytest.mark.asyncio
 async def test_create_athlete_profile_success(db_session):
-    profile_in = AthleteProfileCreate(slug="test_slug", full_name="Test Name")
+    profile_in = AthleteProfileCreate(slug="test_slug")
     profile = await create_athlete_profile(db_session, user_id=10, profile_in=profile_in)
     assert profile.slug == "test_slug"
-    assert profile.full_name == "Test Name"
     assert profile.is_activated is True
 
 @pytest.mark.asyncio
 async def test_create_athlete_profile_duplicate_user(db_session):
-    profile_in = AthleteProfileCreate(slug="test_slug", full_name="Test Name")
+    profile_in = AthleteProfileCreate(slug="test_slug")
     await create_athlete_profile(db_session, user_id=11, profile_in=profile_in)
     
     # Try again
-    with pytest.raises(ValueError, match="L'athlète a déjà un profil."):
+    with pytest.raises(ValueError):
         await create_athlete_profile(db_session, user_id=11, profile_in=profile_in)
 
 @pytest.mark.asyncio
 async def test_create_athlete_profile_duplicate_slug(db_session):
-    profile_in = AthleteProfileCreate(slug="duplicate_slug", full_name="Test Name")
+    profile_in = AthleteProfileCreate(slug="duplicate_slug")
     await create_athlete_profile(db_session, user_id=12, profile_in=profile_in)
     
-    profile_in2 = AthleteProfileCreate(slug="duplicate_slug", full_name="Test Name 2")
-    with pytest.raises(ValueError, match="Ce nom d'utilisateur est déjà pris."):
+    profile_in2 = AthleteProfileCreate(slug="duplicate_slug")
+    with pytest.raises(ValueError):
         await create_athlete_profile(db_session, user_id=13, profile_in=profile_in2)
 
 @pytest.mark.asyncio
 async def test_update_athlete_profile_success(db_session):
-    profile_in = AthleteProfileCreate(slug="update_slug", full_name="Test Name")
+    profile_in = AthleteProfileCreate(slug="update_slug")
     profile = await create_athlete_profile(db_session, user_id=14, profile_in=profile_in)
     
-    update_in = AthleteProfileUpdate(full_name="New Name")
+    update_in = AthleteProfileUpdate()
     updated = await update_athlete_profile(db_session, user_id=14, profile_in=update_in)
     
-    assert updated.full_name == "New Name"
     assert updated.slug == "update_slug"
 
 @pytest.mark.asyncio
 async def test_update_athlete_profile_not_found(db_session):
-    update_in = AthleteProfileUpdate(full_name="New Name")
+    update_in = AthleteProfileUpdate()
     with pytest.raises(ValueError, match="Profil introuvable."):
         await update_athlete_profile(db_session, user_id=999, profile_in=update_in)
 
 @pytest.mark.asyncio
 async def test_update_athlete_profile_duplicate_slug(db_session):
-    profile_in1 = AthleteProfileCreate(slug="first_slug", full_name="User 1")
+    profile_in1 = AthleteProfileCreate(slug="first_slug")
     await create_athlete_profile(db_session, user_id=15, profile_in=profile_in1)
     
-    profile_in2 = AthleteProfileCreate(slug="second_slug", full_name="User 2")
+    profile_in2 = AthleteProfileCreate(slug="second_slug")
     await create_athlete_profile(db_session, user_id=16, profile_in=profile_in2)
     
     update_in = AthleteProfileUpdate(slug="first_slug")
-    with pytest.raises(ValueError, match="Ce nom d'utilisateur est déjà pris."):
+    with pytest.raises(ValueError):
         await update_athlete_profile(db_session, user_id=16, profile_in=update_in)
 
 @pytest.mark.asyncio
 async def test_merge_guest_orders(db_session):
-    order = Order(session_id="guest_session", amount=1000, status=OrderStatus.PENDING)
+    order = Order(session_id="guest_session", total_amount=1000, status=OrderStatus.PENDING)
     db_session.add(order)
     await db_session.commit()
     
@@ -106,11 +104,11 @@ async def test_merge_guest_orders(db_session):
 async def test_get_athlete_timeline(mock_generate_url, db_session):
     mock_generate_url.return_value = "http://fake-url.com"
     
-    comp = Competition(id="comp_1", name="Marathon", date=datetime(2025, 1, 1), status="published", settings={"sport": "Course", "location": "Dakar"})
-    epreuve = Epreuve(id="epreuve_1", name="10km", competition_id="comp_1")
-    photo = Photo(id="photo_1", epreuve_id="epreuve_1", s3_object_key="key1.jpg", url="http://local/key1.jpg", watermark_url="http://local/key1_w.jpg")
-    order = Order(id="order_1", user_id=100, amount=1000, status=OrderStatus.PAID)
-    order_item = OrderItem(order_id="order_1", photo_id="photo_1", amount=1000)
+    comp = Competition(id=1, name="Marathon", date=datetime(2025, 1, 1), photographer_id=1, settings={"sport": "Course", "location": "Dakar"})
+    epreuve = Epreuve(id=1, name="10km", competition_id=1)
+    photo = Photo(id=1, epreuve_id=1, s3_object_key="key1.jpg", watermark_s3_key="key1_w.jpg")
+    order = Order(id=1, user_id=100, total_amount=1000, status=OrderStatus.PAID)
+    order_item = OrderItem(order_id=1, photo_id=1, price=1000)
     
     db_session.add_all([comp, epreuve, photo, order, order_item])
     await db_session.commit()

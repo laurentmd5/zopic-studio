@@ -3,12 +3,12 @@ from PIL import Image, ImageDraw
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy import update
 from app.infrastructure.s3_client import s3_client
-from app.modules.competitions.models import Photo, PhotoStatus
+from app.modules.competitions.models import Photo, PhotoStatus, Epreuve, Competition
 from app.core.config import settings
 
 async def generate_watermark(ctx, photo_id: int, original_key: str, watermark_key: str):
     """
-    TÃ¢che asynchrone Arq pour gÃ©nÃ©rer un filigrane.
+    TÃƒÂ¢che asynchrone Arq pour gÃƒÂ©nÃƒÂ©rer un filigrane.
     """
     try:
         # 1. Download original image
@@ -31,15 +31,15 @@ async def generate_watermark(ctx, photo_id: int, original_key: str, watermark_ke
         async_session = async_sessionmaker(engine, expire_on_commit=False)
         async with async_session() as session:
             from sqlalchemy.future import select
-            from app.modules.competitions.models import Photo, Epreuve, Competition
-            from app.modules.auth.models import User
-            query = select(User.full_name).join(Competition, Competition.photographer_id == User.id).join(Epreuve, Epreuve.competition_id == Competition.id).join(Photo, Photo.epreuve_id == Epreuve.id).where(Photo.id == photo_id)
+            
+            from app.modules.auth.models import PhotographerProfile
+            query = select(PhotographerProfile.full_name).join(Competition, Competition.photographer_id == PhotographerProfile.user_id).join(Epreuve, Epreuve.competition_id == Competition.id).join(Photo, Photo.epreuve_id == Epreuve.id).where(Photo.id == photo_id)
             result = await session.execute(query)
             full_name = result.scalar_one_or_none()
             if full_name:
                 photographer_name = full_name
         
-        text = f"Aperçu — ZoPic Studio | {photographer_name}"
+        text = f"AperÃ§u â€” ZoPic Studio | {photographer_name}"
         
         # Simple watermark top-left (MVP)
         draw.text((20, 20), text, fill=(255, 255, 255, 180))

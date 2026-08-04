@@ -30,7 +30,7 @@ async def test_add_photo():
     mock_result.scalars.return_value = mock_scalars
     mock_db.execute.return_value = mock_result
 
-    # On mock create_pool pour ne pas déclencher Redis
+    # On mock create_pool pour ne pas dÃƒÂ©clencher Redis
     with patch('app.modules.competitions.service.create_pool', new_callable=AsyncMock) as mock_create_pool:
         mock_redis = AsyncMock()
         mock_create_pool.return_value = mock_redis
@@ -45,7 +45,7 @@ async def test_add_photo():
         mock_db.add.assert_called_once()
         mock_db.commit.assert_awaited_once()
 
-        # Vérifie que les jobs ont été mis en queue
+        # VÃƒÂ©rifie que les jobs ont ÃƒÂ©tÃƒÂ© mis en queue
         assert mock_redis.enqueue_job.await_count == 2
         # Verify call to generate_watermark
         mock_redis.enqueue_job.assert_any_call(

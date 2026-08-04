@@ -45,8 +45,7 @@ async def create_profile(
             photos=0,
             disciplines=0,
             albums=0,
-            photographers=0,
-            active_since_year=None
+            photographers=0
         )
         db.add(stats)
         await db.commit()
@@ -64,7 +63,7 @@ async def get_my_profile(
     result = await db.execute(select(AthleteProfile).filter(AthleteProfile.user_id == current_user.id))
     profile = result.scalar_one_or_none()
     if not profile:
-        raise HTTPException(status_code=404, detail="Profil non trouvé")
+        raise HTTPException(status_code=404, detail="Profil non trouvÃ©")
         
     stats_result = await db.execute(select(AthleteStatistics).filter(AthleteStatistics.user_id == current_user.id))
     stats = stats_result.scalar_one_or_none()
@@ -86,7 +85,14 @@ async def update_profile(
         stats_result = await db.execute(select(AthleteStatistics).filter(AthleteStatistics.user_id == current_user.id))
         stats = stats_result.scalar_one_or_none()
         if not stats:
-            stats = AthleteStatistics(user_id=current_user.id)
+            stats = AthleteStatistics(
+                user_id=current_user.id,
+                competitions=0,
+                photos=0,
+                disciplines=0,
+                albums=0,
+                photographers=0
+            )
         profile.statistics = stats
         
         return profile

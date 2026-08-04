@@ -62,8 +62,7 @@ async def update_athlete_statistics(event: PaymentCompletedEvent):
                     photos=photos_count,
                     disciplines=len(sports),
                     albums=0,
-                    photographers=0,
-                    active_since_year=None
+                    photographers=0
                 )
                 db.add(stats)
                 await db.commit()

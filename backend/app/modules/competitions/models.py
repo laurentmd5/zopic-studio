@@ -1,3 +1,4 @@
+from sqlalchemy import JSON
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Enum as SQLEnum
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
@@ -24,10 +25,6 @@ class Competition(Base):
     access_code = Column(String, nullable=True)
     
     # Flexible settings (JSON) to store location, sport, categories, price, etc.
-    from sqlalchemy.dialects.postgresql import JSONB
-    from sqlalchemy import JSON
-    # We use JSON fallback for SQLite/Postgres compatibility during dev, but conception asks for JSONB.
-    # We will just use String for now if JSON is complex, or JSON.
     settings = Column(JSON, nullable=True, default={})
     
     # Packs configuration

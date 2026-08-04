@@ -120,7 +120,7 @@ async def create_athlete_profile(db: AsyncSession, user_id: int, profile_in: Ath
         user_id=user_id,
         slug=profile_in.slug,
         is_activated=True,
-        **profile_in.dict(exclude_unset=True, exclude={'slug'})
+        **profile_in.model_dump(exclude_unset=True, exclude={'slug'})
     )
     
     db.add(new_profile)
@@ -141,7 +141,7 @@ async def update_athlete_profile(db: AsyncSession, user_id: int, profile_in: Ath
         if result_slug.scalar_one_or_none():
             raise ValueError("Ce nom d'utilisateur est déjà pris.")
             
-    update_data = profile_in.dict(exclude_unset=True)
+    update_data = profile_in.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         setattr(profile, field, value)
         

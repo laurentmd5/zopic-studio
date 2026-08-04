@@ -1,3 +1,4 @@
+from datetime import datetime
 import pytest
 from unittest.mock import patch, AsyncMock
 from app.modules.payments.events import PaymentCompletedEvent
@@ -9,7 +10,7 @@ from app.modules.competitions.models import Photo, Epreuve, Competition
 @pytest.mark.asyncio
 async def test_update_athlete_statistics_guest():
     # User ID is None, should return early
-    event = PaymentCompletedEvent(order_id="order_guest", user_id=None, amount=1000, provider="paydunya")
+    event = PaymentCompletedEvent(order_id=999, user_id=None)
     # Should not raise any exception
     await update_athlete_statistics(event)
 
@@ -21,7 +22,7 @@ async def test_update_athlete_statistics_no_items(mock_session_maker, db_session
     mock_session.__aenter__.return_value = db_session
     mock_session_maker.return_value = mock_session
     
-    event = PaymentCompletedEvent(order_id="order_empty", user_id=1, amount=1000, provider="paydunya")
+    event = PaymentCompletedEvent(order_id=998, user_id=1)
     await update_athlete_statistics(event)
     # Shouldn't fail, just returns
 
@@ -33,18 +34,18 @@ async def test_update_athlete_statistics_new_stats(mock_session_maker, db_sessio
     mock_session_maker.return_value = mock_session
     
     # Prepare data
-    comp = Competition(id="comp_stat", name="Test", settings={"sport": "Tennis"})
-    ep = Epreuve(id="ep_stat", competition_id="comp_stat")
-    p1 = Photo(id="p1_stat", epreuve_id="ep_stat")
-    p2 = Photo(id="p2_stat", epreuve_id="ep_stat")
-    o = Order(id="order_stat", user_id=2)
-    oi1 = OrderItem(order_id="order_stat", photo_id="p1_stat")
-    oi2 = OrderItem(order_id="order_stat", photo_id="p2_stat")
+    comp = Competition(id=1, name="Test", date=datetime(2025, 1, 1), photographer_id=1, settings={"sport": "Tennis"})
+    ep = Epreuve(id=1, name="Ep1", competition_id=1)
+    p1 = Photo(id=1, epreuve_id=1, s3_object_key="key1.jpg")
+    p2 = Photo(id=2, epreuve_id=1, s3_object_key="key2.jpg")
+    o = Order(id=100, user_id=2, total_amount=1000)
+    oi1 = OrderItem(order_id=100, photo_id=1, price=1000)
+    oi2 = OrderItem(order_id=100, photo_id=2, price=1000)
     
     db_session.add_all([comp, ep, p1, p2, o, oi1, oi2])
     await db_session.commit()
     
-    event = PaymentCompletedEvent(order_id="order_stat", user_id=2, amount=2000, provider="paydunya")
+    event = PaymentCompletedEvent(order_id=100, user_id=2)
     await update_athlete_statistics(event)
     
     # Verify new stats created
@@ -67,16 +68,16 @@ async def test_update_athlete_statistics_existing_stats(mock_session_maker, db_s
     existing_stats = AthleteStatistics(user_id=3, photos=10, competitions=2, disciplines=1)
     db_session.add(existing_stats)
     
-    comp = Competition(id="comp_stat2", name="Test2", settings={"sport": "Natation"})
-    ep = Epreuve(id="ep_stat2", competition_id="comp_stat2")
-    p1 = Photo(id="p3_stat", epreuve_id="ep_stat2")
-    o = Order(id="order_stat2", user_id=3)
-    oi1 = OrderItem(order_id="order_stat2", photo_id="p3_stat")
+    comp = Competition(id=2, name="Test2", date=datetime(2025, 1, 1), photographer_id=1, settings={"sport": "Natation"})
+    ep = Epreuve(id=2, name="Ep2", competition_id=2)
+    p1 = Photo(id=3, epreuve_id=2, s3_object_key="key3.jpg")
+    o = Order(id=101, user_id=3, total_amount=1000)
+    oi1 = OrderItem(order_id=101, photo_id=3, price=1000)
     
     db_session.add_all([comp, ep, p1, o, oi1])
     await db_session.commit()
     
-    event = PaymentCompletedEvent(order_id="order_stat2", user_id=3, amount=1000, provider="paydunya")
+    event = PaymentCompletedEvent(order_id=101, user_id=3)
     await update_athlete_statistics(event)
     
     # Verify stats updated

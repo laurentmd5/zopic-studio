@@ -1,3 +1,4 @@
+from datetime import datetime
 import pytest
 from httpx import AsyncClient
 from app.modules.athletes.models import AthleteProfile, AthleteStatistics, PrivacyLevel
@@ -8,7 +9,6 @@ async def test_get_public_athlete_profile_success(async_client: AsyncClient, db_
     profile = AthleteProfile(
         user_id=101,
         slug="john-doe",
-        full_name="John Doe",
         is_activated=True,
         is_public=PrivacyLevel.PUBLIC
     )
@@ -19,8 +19,7 @@ async def test_get_public_athlete_profile_success(async_client: AsyncClient, db_
         photos=50,
         disciplines=2,
         albums=5,
-        photographers=3,
-        active_since_year=2023
+        photographers=3, first_event_date=datetime(2023, 1, 1)
     )
     db_session.add(stats)
     await db_session.commit()
@@ -30,7 +29,6 @@ async def test_get_public_athlete_profile_success(async_client: AsyncClient, db_
     assert response.status_code == 200
     data = response.json()
     assert data["slug"] == "john-doe"
-    assert data["full_name"] == "John Doe"
     assert data["statistics"]["competitions"] == 10
     assert data["statistics"]["photos"] == 50
 
@@ -40,7 +38,6 @@ async def test_get_public_athlete_profile_no_stats(async_client: AsyncClient, db
     profile = AthleteProfile(
         user_id=102,
         slug="jane-doe",
-        full_name="Jane Doe",
         is_activated=True,
         is_public=PrivacyLevel.PUBLIC
     )
@@ -65,7 +62,6 @@ async def test_get_public_athlete_profile_not_activated(async_client: AsyncClien
     profile = AthleteProfile(
         user_id=103,
         slug="inactive-doe",
-        full_name="Inactive",
         is_activated=False,
         is_public=PrivacyLevel.PUBLIC
     )
@@ -81,7 +77,6 @@ async def test_get_public_athlete_profile_private(async_client: AsyncClient, db_
     profile = AthleteProfile(
         user_id=104,
         slug="private-doe",
-        full_name="Private",
         is_activated=True,
         is_public=PrivacyLevel.PRIVATE
     )

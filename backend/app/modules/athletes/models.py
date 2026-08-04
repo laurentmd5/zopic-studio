@@ -55,6 +55,10 @@ class AthleteStatistics(Base):
     
     first_event_date = Column(Date, nullable=True)
     
+    @property
+    def active_since_year(self):
+        return self.first_event_date.year if self.first_event_date else None
+    
     updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
     
     user = relationship("User", backref="statistics")

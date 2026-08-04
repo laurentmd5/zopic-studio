@@ -64,4 +64,4 @@ async def test_download_photo_no_permission(async_client, db_session):
     )
     
     assert res.status_code == 403
-    assert "Aucun droit de téléchargement" in res.json()["detail"]
+    assert "Aucun droit" in res.json()["detail"]

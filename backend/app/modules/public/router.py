@@ -43,8 +43,7 @@ async def get_public_athlete_profile(
             photos=0,
             disciplines=0,
             albums=0,
-            photographers=0,
-            active_since_year=None
+            photographers=0
         )
         
     # Set the statistics on the profile object (Pydantic will pick it up via from_attributes)

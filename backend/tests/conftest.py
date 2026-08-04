@@ -31,11 +31,20 @@ async def test_engine():
 
 @pytest_asyncio.fixture(scope="function")
 async def db_session(test_engine):
+    # RecrÃƒÂ©er les tables pour chaque test
+    async with test_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+        await conn.run_sync(Base.metadata.create_all)
+        
     TestingSessionLocal = sessionmaker(
         bind=test_engine, class_=AsyncSession, expire_on_commit=False
     )
     async with TestingSessionLocal() as session:
         yield session
+    
+    # Nettoyer aprÃƒÂ¨s chaque test
+    async with test_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
 
 @pytest_asyncio.fixture(scope="function")
 async def async_client(db_session):

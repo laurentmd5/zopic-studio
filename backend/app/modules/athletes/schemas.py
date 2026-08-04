@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional, Any, Dict
 from datetime import date
 
@@ -45,7 +45,8 @@ class AthleteStatisticsResponse(BaseModel):
     disciplines: int
     albums: int
     photographers: int
-    active_since_year: Optional[int]
+    active_since_year: Optional[int] = None
+    model_config = ConfigDict(from_attributes=True)
 
 class PublicAthleteProfileResponse(BaseModel):
     id: int
@@ -62,7 +63,7 @@ class PublicAthleteProfileResponse(BaseModel):
     cover_photo_url: Optional[str]
     favorite_photo_id: Optional[int]
     
-    statistics: AthleteStatisticsResponse
+    statistics: Optional[AthleteStatisticsResponse] = None
     
     class Config:
         from_attributes = True
