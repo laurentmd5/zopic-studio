@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     S3_ACCESS_KEY: str
     S3_SECRET_KEY: str
     S3_BUCKET_NAME: str
-    S3_REGION: str
+    S3_REGION: str = "us-east-1"
     
     QDRANT_URL: str
     
@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     EMAILS_FROM_NAME: str
     
     PAYMENT_SIMULATION_MODE: bool = True
-    PAYMENT_WEBHOOK_SECRET: str
+    PAYMENT_WEBHOOK_SECRET: str = "test_webhook_secret"
     
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=True, extra="ignore")
 

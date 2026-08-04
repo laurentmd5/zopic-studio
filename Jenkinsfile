@@ -152,8 +152,8 @@ pipeline {
                     echo 'Application du schema de base de donnees (Alembic)...'
                     sh """
                         cd ${DEPLOY_PATH}
-                        docker compose -f ${COMPOSE_FILE} exec -T backend uv run python scripts/db_migrate.py
-                        docker compose -f ${COMPOSE_FILE} exec -T backend uv run python scripts/init_qdrant.py || true
+                        docker compose -f ${COMPOSE_FILE} exec -T backend python scripts/db_migrate.py
+                        docker compose -f ${COMPOSE_FILE} exec -T backend python scripts/init_qdrant.py || true
                     """
                 }
             }
