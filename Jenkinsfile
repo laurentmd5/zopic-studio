@@ -55,8 +55,7 @@ pipeline {
                 dir('frontend-web') {
                     script {
                         echo 'Exécution des tests Frontend Web avec Vitest...'
-                        sh 'npm install'
-                        sh 'npm run test -- --run'
+                        sh 'docker run --rm -v "${WORKSPACE}/frontend-web:/app" -w /app node:22-alpine sh -c "npm install && npm run test -- --run"'
                     }
                 }
             }
@@ -70,8 +69,7 @@ pipeline {
                 dir('frontend-client') {
                     script {
                         echo 'Exécution des tests Frontend Client avec Vitest...'
-                        sh 'npm install'
-                        sh 'npm run test -- --run'
+                        sh 'docker run --rm -v "${WORKSPACE}/frontend-client:/app" -w /app node:22-alpine sh -c "npm install && npm run test -- --run"'
                     }
                 }
             }
