@@ -12,9 +12,13 @@ from app.core.config import settings
 from app.core.database import Base
 # Make sure models are imported so Base has them
 from app.modules.auth import models as auth_models
-from app.modules.events import models as events_models
+from app.modules.competitions import models as competitions_models
 from app.modules.payments import models as payments_models
 from app.modules.subscriptions import models as subscriptions_models
+from app.modules.athletes import models as athletes_models
+from app.modules.favorites import models as favorites_models
+from app.modules.storage import models as storage_models
+from app.modules.downloads import models as downloads_models
 
 async def check_and_create_tables():
     # Enforce asyncpg dialect for Alembic if not in URL
