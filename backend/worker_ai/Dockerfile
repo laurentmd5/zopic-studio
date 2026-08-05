@@ -20,7 +20,7 @@ WORKDIR /app
 COPY pyproject.toml ./
 
 # Installer les dépendances
-RUN uv sync --frozen --no-dev --no-cache || uv sync --no-dev --no-cache
+RUN uv sync --python /usr/local/bin/python --frozen --no-dev --no-cache || uv sync --python /usr/local/bin/python --no-dev --no-cache
 
 # Runtime Stage
 FROM python:3.11-slim

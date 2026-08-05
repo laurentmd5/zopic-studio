@@ -12,7 +12,7 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 COPY pyproject.toml uv.lock ./
 
 # Create virtual environment and install dependencies without dev dependencies
-RUN uv sync --frozen --no-dev --no-cache
+RUN uv sync --python /usr/local/bin/python --frozen --no-dev --no-cache
 
 # Runtime Stage
 FROM python:3.13-slim
