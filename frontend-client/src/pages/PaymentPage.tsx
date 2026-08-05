@@ -4,17 +4,24 @@ import { useCartStore } from '../store/cartStore'
 import { usePaymentStore } from '../store/paymentStore'
 import { useDownloadStore } from '../store/downloadStore'
 import { useFavoriteStore } from '../store/favoriteStore'
-import { ArrowLeft, CheckCircle, Lock } from 'lucide-react'
+import { ChevronLeft, CheckCircle, Lock, AlertCircle } from 'lucide-react'
+import './PaymentPage.css'
 
-type PaymentMethod = 'wave' | 'orange' | 'card'
+type PaymentMethod = 'wave' | 'orange'
 
 export default function PaymentPage() {
   const navigate = useNavigate()
-  const { items, total, clearCart } = useCartStore()
+  const { items, clearCart } = useCartStore()
   const { status, setStatus } = usePaymentStore()
   const { setPurchasedPhotos } = useDownloadStore()
   
   const [method, setMethod] = useState<PaymentMethod>('wave')
+
+  // Calculate pricing based on mockup logic
+  const BASE_PRICE = 590
+  const DISCOUNTED_PRICE = 500
+  const hasPackDiscount = items.length >= 3;
+  const currentTotal = hasPackDiscount ? items.length * DISCOUNTED_PRICE : items.length * BASE_PRICE;
 
   const handlePayment = () => {
     if (items.length === 0) return
@@ -38,105 +45,116 @@ export default function PaymentPage() {
   // Si on accède directement sans panier, on redirige
   if (items.length === 0 && status === 'idle') {
     return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6">
-        <h2 className="text-xl font-bold mb-4">Aucun paiement en attente</h2>
-        <button className="btn-outline w-full py-4 rounded-xl" onClick={() => navigate('/')}>Retour à l'accueil</button>
+      <div className="payment-container">
+        <header className="payment-header">
+          <button onClick={() => navigate(-1)} className="back-btn">
+            <ChevronLeft size={24} />
+          </button>
+          <h2 className="page-title">Paiement</h2>
+        </header>
+        <div className="payment-empty">
+          <AlertCircle size={48} color="var(--color-text-muted)" style={{ marginBottom: '1rem' }} />
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.5rem' }}>Aucun paiement en attente</h2>
+          <button className="btn btn-outline" style={{ marginTop: '2rem' }} onClick={() => navigate('/')}>
+            Retour à l'accueil
+          </button>
+        </div>
       </div>
     )
   }
 
   if (status === 'processing') {
     return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 pb-20">
-        <div className="w-16 h-16 border-4 border-[#3A4B29] border-t-transparent rounded-full animate-spin mb-4"></div>
-        <h3 className="text-xl font-bold text-gray-900">Paiement en cours...</h3>
-        <p className="text-gray-500 mt-2 text-center">Veuillez valider la transaction sur votre application de paiement.</p>
+      <div className="payment-container">
+        <div className="payment-status">
+          <div className="spinner" style={{ marginBottom: '1.5rem', borderColor: 'var(--color-surface)', borderTopColor: 'var(--color-primary)' }}></div>
+          <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.5rem' }}>Paiement en cours...</h3>
+          <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>Veuillez valider la transaction sur votre application {method === 'wave' ? 'Wave' : 'Orange Money'}.</p>
+        </div>
       </div>
     )
   }
 
   if (status === 'success') {
     return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 pb-20">
-        <CheckCircle size={64} className="text-[#3A4B29] mb-4" />
-        <h3 className="text-2xl font-bold text-gray-900">Paiement Réussi !</h3>
-        <p className="text-gray-500 mt-2 text-center">Génération de vos photos en haute définition...</p>
+      <div className="payment-container">
+        <div className="payment-status">
+          <CheckCircle size={64} color="var(--color-primary)" style={{ marginBottom: '1rem' }} />
+          <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.5rem' }}>Paiement Réussi !</h3>
+          <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>Génération de vos photos en haute définition...</p>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-white pb-40">
+    <div className="payment-container">
       {/* Header */}
-      <div className="px-6 pt-8 pb-4 flex items-center border-b border-gray-100">
-        <button onClick={() => navigate(-1)} className="text-gray-900">
-          <ArrowLeft size={24} />
+      <header className="payment-header">
+        <button onClick={() => navigate(-1)} className="back-btn">
+          <ChevronLeft size={24} />
         </button>
-        <h2 className="ml-4 text-xl font-bold text-gray-900">Paiement</h2>
-      </div>
+        <h2 className="page-title">Paiement</h2>
+      </header>
 
-      <div className="px-6 pt-8">
-        <div className="text-sm font-medium text-gray-500 mb-2">Montant à payer</div>
-        <div className="text-4xl font-black text-gray-900 mb-8">{total} FCFA</div>
+      <div className="payment-content">
+        <div className="amount-block">
+          <span className="amount-label">Montant à payer</span>
+          <span className="amount-value">{currentTotal.toLocaleString('fr-FR')} FCFA</span>
+        </div>
 
-        <h3 className="font-semibold text-gray-900 mb-4">Choisissez votre moyen de paiement</h3>
-        
-        <div className="space-y-3">
-          {/* Wave */}
-          <div 
-            onClick={() => setMethod('wave')}
-            className={`flex items-center justify-between p-4 rounded-xl border-2 cursor-pointer transition-colors ${method === 'wave' ? 'border-[#3A4B29] bg-green-50/50' : 'border-gray-100 bg-white'}`}
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-xl">~</div>
-              <span className="font-semibold text-gray-900">Wave</span>
+        <div>
+          <h3 className="payment-methods-title">Choisissez votre moyen de paiement</h3>
+          
+          <div className="payment-methods-list">
+            {/* Wave */}
+            <div 
+              onClick={() => setMethod('wave')}
+              className={`payment-method-card ${method === 'wave' ? 'active' : ''}`}
+            >
+              <div className="payment-method-info">
+                {/* Wave Logo Placeholder */}
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#00B0FF', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold' }}>
+                  W
+                </div>
+                <span className="payment-method-name">Wave</span>
+              </div>
+              <div className="radio-btn">
+                <div className="radio-btn-inner"></div>
+              </div>
             </div>
-            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${method === 'wave' ? 'border-[#3A4B29]' : 'border-gray-300'}`}>
-              {method === 'wave' && <div className="w-3 h-3 bg-[#3A4B29] rounded-full"></div>}
-            </div>
-          </div>
 
-          {/* Orange Money */}
-          <div 
-            onClick={() => setMethod('orange')}
-            className={`flex items-center justify-between p-4 rounded-xl border-2 cursor-pointer transition-colors ${method === 'orange' ? 'border-[#3A4B29] bg-green-50/50' : 'border-gray-100 bg-white'}`}
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center text-white font-bold">OM</div>
-              <span className="font-semibold text-gray-900">Orange Money</span>
-            </div>
-            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${method === 'orange' ? 'border-[#3A4B29]' : 'border-gray-300'}`}>
-              {method === 'orange' && <div className="w-3 h-3 bg-[#3A4B29] rounded-full"></div>}
-            </div>
-          </div>
-
-          {/* Carte Bancaire */}
-          <div 
-            onClick={() => setMethod('card')}
-            className={`flex items-center justify-between p-4 rounded-xl border-2 cursor-pointer transition-colors ${method === 'card' ? 'border-[#3A4B29] bg-green-50/50' : 'border-gray-100 bg-white'}`}
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center text-white font-bold text-xs">CB</div>
-              <span className="font-semibold text-gray-900">Carte bancaire</span>
-            </div>
-            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${method === 'card' ? 'border-[#3A4B29]' : 'border-gray-300'}`}>
-              {method === 'card' && <div className="w-3 h-3 bg-[#3A4B29] rounded-full"></div>}
+            {/* Orange Money */}
+            <div 
+              onClick={() => setMethod('orange')}
+              className={`payment-method-card ${method === 'orange' ? 'active' : ''}`}
+            >
+              <div className="payment-method-info">
+                {/* Orange Money Logo Placeholder */}
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#FF6600', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold' }}>
+                  O
+                </div>
+                <span className="payment-method-name">Orange Money</span>
+              </div>
+              <div className="radio-btn">
+                <div className="radio-btn-inner"></div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Sticky Bottom Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white p-4 pb-8 z-50 flex flex-col items-center gap-3 shadow-[0_-10px_20px_rgba(0,0,0,0.02)]" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1rem)' }}>
+      <div className="payment-sticky-bar">
         <button 
-          className="w-full py-4 bg-[#3A4B29] text-white font-bold rounded-xl shadow-md text-lg"
+          className="payment-btn"
           onClick={handlePayment}
         >
-          Payer {total} FCFA
+          Payer {currentTotal.toLocaleString('fr-FR')} FCFA
         </button>
-        <div className="flex items-center gap-2 text-gray-500 text-sm">
+        <div className="secure-text">
           <Lock size={14} />
-          Paiement 100% sécurisé
+          <span>Paiement 100% sécurisé</span>
         </div>
       </div>
     </div>

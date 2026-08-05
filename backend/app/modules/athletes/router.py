@@ -11,15 +11,26 @@ from app.modules.athletes.schemas import (
     SlugSuggestionsResponse,
     AthleteProfileCreate,
     AthleteProfileUpdate,
-    PublicAthleteProfileResponse
+    PublicAthleteProfileResponse,
+    AthleteGalleryResponse,
+    AthleteGalleryCreate,
+    AthleteShareResponse,
+    AthleteShareCreate
 )
 from app.modules.athletes.services import (
     get_athlete_timeline,
     get_slug_suggestions,
     create_athlete_profile,
-    update_athlete_profile
+    update_athlete_profile,
+    get_athlete_gallery,
+    add_photo_to_gallery,
+    remove_photo_from_gallery,
+    get_athlete_shares,
+    add_athlete_share,
+    remove_athlete_share
 )
 from app.modules.athletes.models import AthleteProfile, AthleteStatistics
+from typing import List
 
 router = APIRouter(tags=["Athletes"])
 
@@ -115,3 +126,62 @@ async def get_timeline(
         user_id=user_id,
         session_id=x_session_id if not user_id else None
     )
+
+# Gallery Endpoints
+@router.get("/me/gallery", response_model=List[AthleteGalleryResponse])
+async def get_gallery(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    return await get_athlete_gallery(db, current_user.id)
+
+@router.post("/me/gallery", response_model=AthleteGalleryResponse)
+async def add_to_gallery(
+    gallery_in: AthleteGalleryCreate,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    try:
+        return await add_photo_to_gallery(db, current_user.id, gallery_in)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.delete("/me/gallery/{photo_id}")
+async def remove_from_gallery(
+    photo_id: int,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    try:
+        await remove_photo_from_gallery(db, current_user.id, photo_id)
+        return {"detail": "Photo retirée de la galerie"}
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+# Share Endpoints
+@router.get("/me/shares", response_model=List[AthleteShareResponse])
+async def get_shares(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    return await get_athlete_shares(db, current_user.id)
+
+@router.post("/me/shares", response_model=AthleteShareResponse)
+async def add_share(
+    share_in: AthleteShareCreate,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    return await add_athlete_share(db, current_user.id, share_in)
+
+@router.delete("/me/shares/{share_id}")
+async def remove_share(
+    share_id: int,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    try:
+        await remove_athlete_share(db, current_user.id, share_id)
+        return {"detail": "Lien supprimé"}
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))

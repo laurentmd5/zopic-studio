@@ -3,7 +3,7 @@ from sqlalchemy.future import select
 from sqlalchemy import func, or_
 from app.modules.payments.models import Order, OrderItem, OrderStatus
 from app.modules.competitions.models import Photo, Epreuve, Competition
-from app.modules.athletes.schemas import TimelineResponse, YearGroup, CompetitionTimelineItem
+from app.modules.athletes.schemas import TimelineResponse, YearGroup, CompetitionTimelineItem, AthleteGalleryCreate, AthleteShareCreate
 from app.modules.storage.service import generate_download_url
 from collections import defaultdict
 from typing import Optional
@@ -159,4 +159,94 @@ async def merge_guest_orders(db: AsyncSession, user_id: int, session_id: str):
         .values(user_id=user_id, session_id=None)
     )
     await db.commit()
+
+# Gallery Services
+async def get_athlete_gallery(db: AsyncSession, user_id: int):
+    from app.modules.athletes.models import AthleteGallery
+    result = await db.execute(
+        select(AthleteGallery)
+        .filter(AthleteGallery.user_id == user_id)
+        .order_by(AthleteGallery.order.asc())
+    )
+    return result.scalars().all()
+
+async def add_photo_to_gallery(db: AsyncSession, user_id: int, gallery_in: AthleteGalleryCreate):
+    from app.modules.athletes.models import AthleteGallery
+    
+    # Check if already in gallery
+    existing = await db.execute(
+        select(AthleteGallery)
+        .filter(AthleteGallery.user_id == user_id, AthleteGallery.photo_id == gallery_in.photo_id)
+    )
+    if existing.scalar_one_or_none():
+        raise ValueError("Photo already in gallery")
+        
+    gallery_item = AthleteGallery(
+        user_id=user_id,
+        photo_id=gallery_in.photo_id,
+        order=gallery_in.order
+    )
+    db.add(gallery_item)
+    await db.commit()
+    await db.refresh(gallery_item)
+    return gallery_item
+
+async def remove_photo_from_gallery(db: AsyncSession, user_id: int, photo_id: int):
+    from app.modules.athletes.models import AthleteGallery
+    result = await db.execute(
+        select(AthleteGallery)
+        .filter(AthleteGallery.user_id == user_id, AthleteGallery.photo_id == photo_id)
+    )
+    item = result.scalar_one_or_none()
+    if not item:
+        raise ValueError("Photo not found in gallery")
+        
+    await db.delete(item)
+    await db.commit()
+    return True
+
+# Share Services
+async def get_athlete_shares(db: AsyncSession, user_id: int):
+    from app.modules.athletes.models import AthleteShare
+    result = await db.execute(
+        select(AthleteShare)
+        .filter(AthleteShare.user_id == user_id)
+        .order_by(AthleteShare.created_at.desc())
+    )
+    return result.scalars().all()
+
+async def add_athlete_share(db: AsyncSession, user_id: int, share_in: AthleteShareCreate):
+    from app.modules.athletes.models import AthleteShare, ShareType
+    
+    # Simple logic to determine type
+    share_type = ShareType.LINK
+    if "youtube.com" in share_in.url or "youtu.be" in share_in.url:
+        share_type = ShareType.YOUTUBE
+    elif "article" in share_in.url or "news" in share_in.url:
+        share_type = ShareType.ARTICLE
+        
+    share_item = AthleteShare(
+        user_id=user_id,
+        title=share_in.title,
+        url=share_in.url,
+        type=share_type
+    )
+    db.add(share_item)
+    await db.commit()
+    await db.refresh(share_item)
+    return share_item
+
+async def remove_athlete_share(db: AsyncSession, user_id: int, share_id: int):
+    from app.modules.athletes.models import AthleteShare
+    result = await db.execute(
+        select(AthleteShare)
+        .filter(AthleteShare.id == share_id, AthleteShare.user_id == user_id)
+    )
+    item = result.scalar_one_or_none()
+    if not item:
+        raise ValueError("Share not found")
+        
+    await db.delete(item)
+    await db.commit()
+    return True
 

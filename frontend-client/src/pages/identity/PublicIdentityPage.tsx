@@ -1,201 +1,186 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import QRCode from 'react-qr-code';
-import { Share2, CheckCircle, Camera, Trophy, Image as ImageIcon, Users, X, MapPin } from 'lucide-react';
-import { identityApi } from '../../api/identity';
-import type { PublicAthleteProfile } from '../../api/identity';
+import React from 'react';
+import { Share2, MapPin, CheckCircle2, User, Activity, Link as LinkIcon } from 'lucide-react';
+import './PublicIdentityPage.css';
 
 const PublicIdentityPage: React.FC = () => {
-  const { handle } = useParams<{ handle: string }>();
-  const navigate = useNavigate();
-  const slug = handle?.startsWith('@') ? handle.substring(1) : handle;
-  const [profile, setProfile] = useState<PublicAthleteProfile | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [showQR, setShowQR] = useState(false);
-
-  useEffect(() => {
-    if (slug) {
-      identityApi.getPublicProfile(slug)
-        .then(data => {
-          setProfile(data);
-          document.title = `${data.bio ? data.bio + ' | ' : ''}ZoPic`;
-          const metaDesc = document.querySelector('meta[name="description"]');
-          if (metaDesc) {
-             metaDesc.setAttribute("content", `Découvrez les photos sportives de ${slug} sur ZoPic.`);
-          }
-        })
-        .catch(err => {
-          console.error(err);
-          setError("Profil introuvable ou privé.");
-        })
-        .finally(() => setLoading(false));
-    }
-  }, [slug]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center">
-        <div className="w-10 h-10 border-4 border-[#3A4B29] border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
-  }
-
-  if (error || !profile) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 text-center">
-        <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mb-6">
-          <Camera size={32} className="text-gray-400" />
-        </div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Profil Introuvable</h2>
-        <p className="text-gray-500 mb-8 max-w-sm">Ce profil n'existe pas ou a été défini comme privé par le sportif.</p>
-        <button className="btn-primary w-full max-w-sm py-3 rounded-xl font-bold shadow-md" onClick={() => navigate('/')}>
-          Retour à l'accueil
-        </button>
-      </div>
-    );
-  }
-
-  const themeColors: Record<string, string> = {
-    blue: 'bg-blue-600',
-    red: 'bg-red-600',
-    green: 'bg-[#3A4B29]',
-    black: 'bg-gray-900',
-  };
-
-  const themeBg = themeColors[profile.theme_color] || themeColors['green'];
-  const profileUrl = `${window.location.origin}/@${slug}`;
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      {/* Cover */}
-      <div className={`h-48 w-full ${themeBg} relative rounded-b-3xl shadow-sm`}>
-        {profile.cover_photo_url && (
-          <img src={profile.cover_photo_url} alt="Cover" className="w-full h-full object-cover rounded-b-3xl opacity-80 mix-blend-overlay" />
-        )}
-        <div className="absolute top-6 right-6 flex space-x-2">
-          <button 
-            onClick={() => setShowQR(true)}
-            className="p-2.5 bg-black/20 backdrop-blur-md rounded-full text-white hover:bg-black/40 transition shadow-sm"
-          >
-            <Share2 size={20} />
-          </button>
+    <div className="public-profile-container">
+      {/* Navbar */}
+      <nav className="public-navbar">
+        <div className="public-navbar-logo">
+          ZoPic
+          <span>STUDIO</span>
         </div>
-      </div>
+        <div className="public-navbar-links">
+          <a href="#">Accueil</a>
+          <a href="#">Compétitions</a>
+          <a href="#">Photographes</a>
+          <a href="#">Tarifs</a>
+        </div>
+        <button className="public-navbar-btn">Se connecter</button>
+      </nav>
 
-      {/* Profile Header */}
-      <div className="max-w-3xl mx-auto px-6 -mt-16 relative z-10">
-        <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
-          <div className="flex flex-col items-center text-center">
-            <div className="w-28 h-28 rounded-full border-4 border-white shadow-lg overflow-hidden bg-gray-100 -mt-20 mb-4 shrink-0 relative">
-              {profile.profile_photo_url ? (
-                <img src={profile.profile_photo_url} alt="Profile" className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-gray-300">
-                  {slug?.charAt(0).toUpperCase()}
-                </div>
-              )}
-            </div>
-            
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 flex items-center justify-center gap-1.5 mb-2">
-                @{profile.slug}
-                {profile.is_verified && <CheckCircle size={20} className="text-blue-500" />}
-              </h1>
+      {/* Hero Section */}
+      <div className="hero-section">
+        <div className="hero-overlay"></div>
+        <div className="hero-content-wrapper">
+          <div className="hero-profile-info">
+            <img 
+              src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&q=80" 
+              alt="Moussa Diop" 
+              className="hero-avatar"
+            />
+            <div className="hero-details">
+              <div className="hero-handle-row">
+                <h1 className="hero-handle">@moussa.dkr</h1>
+                <CheckCircle2 size={24} className="hero-verified" fill="currentColor" color="white" />
+              </div>
+              <h2 className="hero-name">Moussa Diop</h2>
               
-              <div className="text-gray-600 space-y-2 mb-4">
-                {profile.bio && <p className="text-gray-800 font-medium">{profile.bio}</p>}
-                <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-500 font-medium mt-2">
-                  {profile.club && <span className="flex items-center gap-1">🏢 {profile.club}</span>}
-                  {profile.nationality && <span className="flex items-center gap-1"><MapPin size={14} /> {profile.nationality}</span>}
+              <div className="hero-tags">
+                <div className="hero-tag">
+                  <CheckCircle2 size={14} color="#D4AF37" />
+                  <span>Athlétisme</span>
+                </div>
+                <div className="hero-tag">
+                  <MapPin size={14} color="#D4AF37" />
+                  <span>Coureur de fond</span>
+                </div>
+                <div className="hero-tag">
+                  <MapPin size={14} color="#D4AF37" />
+                  <span>Dakar, Sénégal</span>
+                </div>
+                <div className="hero-tag">
+                  <User size={14} color="#D4AF37" />
+                  <span>ASC Jaraaf</span>
                 </div>
               </div>
 
-              {/* Dynamic Sport Attributes */}
-              {profile.sport_attributes && Object.keys(profile.sport_attributes).length > 0 && (
-                <div className="flex flex-wrap justify-center gap-2 mt-4">
-                  {Object.entries(profile.sport_attributes).map(([key, value]) => (
-                    <span key={key} className="px-3 py-1 bg-gray-50 border border-gray-200 text-gray-700 text-xs font-bold rounded-full capitalize">
-                      {key}: {value as string}
-                    </span>
-                  ))}
+              <div className="hero-stats">
+                <div className="hero-stat">
+                  <span className="hero-stat-value">🏅 17</span>
+                  <span className="hero-stat-label">Compétitions</span>
                 </div>
-              )}
+                <div className="hero-stat">
+                  <span className="hero-stat-value">📷 246</span>
+                  <span className="hero-stat-label">Photos achetées</span>
+                </div>
+                <div className="hero-stat">
+                  <span className="hero-stat-value">📁 9</span>
+                  <span className="hero-stat-label">Albums</span>
+                </div>
+                <div className="hero-stat">
+                  <span className="hero-stat-value">📸 8</span>
+                  <span className="hero-stat-label">Photographes</span>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 gap-4 mt-6">
-          <StatCard icon={<Trophy size={20} className="text-[#3A4B29]" />} label="Événements" value={profile.statistics.competitions} />
-          <StatCard icon={<Camera size={20} className="text-[#3A4B29]" />} label="Photos" value={profile.statistics.photos} />
-        </div>
-        <div className="grid grid-cols-2 gap-4 mt-4">
-          <StatCard icon={<ImageIcon size={20} className="text-[#3A4B29]" />} label="Albums" value={profile.statistics.albums} />
-          <StatCard icon={<Users size={20} className="text-[#3A4B29]" />} label="Disciplines" value={profile.statistics.disciplines} />
-        </div>
-
-        {/* Timeline Placeholder */}
-        <div className="mt-8 mb-4">
-          <h2 className="text-xl font-bold text-gray-900 mb-4 px-2">Carrière Sportive</h2>
-          {profile.statistics.competitions > 0 ? (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 text-center text-gray-500 flex flex-col items-center">
-               <ImageIcon size={32} className="text-gray-300 mb-3" />
-               <p className="font-medium text-gray-800 mb-1">Palmarès en cours de construction</p>
-               <p className="text-sm">Les événements de {slug} apparaîtront bientôt ici.</p>
+          <div className="hero-share-block">
+            <span className="share-label">Partager mon profil</span>
+            <div className="qr-box">
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://zopic.studio/@moussa.dkr" alt="QR Code" />
             </div>
-          ) : (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center text-gray-500 flex flex-col items-center">
-               <Camera size={40} className="text-gray-300 mb-4" />
-               <p className="font-bold text-gray-900 mb-2">Aucune photo pour le moment</p>
-               <p className="text-sm mb-6">@{profile.slug} n'a pas encore de photos publiques.</p>
+            <div className="share-actions">
+              <button className="btn-copy">Copier le lien</button>
+              <button className="btn-icon"><Share2 size={16} /></button>
             </div>
-          )}
+          </div>
         </div>
       </div>
 
-      {/* Share Modal */}
-      {showQR && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4 sm:p-0">
-          <div className="bg-white rounded-3xl p-6 w-full max-w-sm text-center shadow-xl mb-4 sm:mb-0 transform transition-all relative">
-            <button 
-              onClick={() => setShowQR(false)}
-              className="absolute top-4 right-4 p-2 bg-gray-100 rounded-full text-gray-500 hover:bg-gray-200"
-            >
-              <X size={18} />
-            </button>
-            <h3 className="text-xl font-bold text-gray-900 mb-2 mt-4">Partager le profil</h3>
-            <p className="text-sm text-gray-500 mb-6 px-4">Flashez ce QR Code ou copiez le lien pour partager ce profil.</p>
+      {/* Main Content */}
+      <main className="profile-main">
+        {/* Tabs */}
+        <div className="profile-tabs">
+          <div className="profile-tab">À propos</div>
+          <div className="profile-tab active">Timeline</div>
+          <div className="profile-tab">Galerie</div>
+          <div className="profile-tab">Palmarès</div>
+          <div className="profile-tab">Partages</div>
+        </div>
+
+        <div className="profile-columns">
+          {/* Left Column (Timeline) */}
+          <div className="profile-col-left">
+            <h3 className="section-title">Ma carrière en images</h3>
             
-            <div className="bg-gray-50 p-6 rounded-2xl inline-block shadow-inner border border-gray-100 mb-8">
-              <QRCode value={profileUrl} size={180} fgColor="#3A4B29" />
+            <div className="desktop-timeline">
+              <div className="timeline-card">
+                <div className="tc-info">
+                  <div className="tc-date">12 Avril 2025</div>
+                  <div className="tc-title">Marathon Dakar 2025</div>
+                  <div className="tc-location">Dakar, Sénégal</div>
+                </div>
+                <div className="tc-stats">56 photos</div>
+                <img src="https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=100&q=80" alt="Marathon" className="tc-img" />
+              </div>
+
+              <div className="timeline-card">
+                <div className="tc-info">
+                  <div className="tc-date">22 Février 2025</div>
+                  <div className="tc-title">Semi-Marathon de Saint-Louis</div>
+                  <div className="tc-location">Saint-Louis, Sénégal</div>
+                </div>
+                <div className="tc-stats">42 photos</div>
+                <img src="https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?w=100&q=80" alt="Semi Marathon" className="tc-img" />
+              </div>
+
+              <div className="timeline-card">
+                <div className="tc-info">
+                  <div className="tc-date">5 Janvier 2025</div>
+                  <div className="tc-title">Dakar 10K</div>
+                  <div className="tc-location">Dakar, Sénégal</div>
+                </div>
+                <div className="tc-stats">38 photos</div>
+                <img src="https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=100&q=80" alt="Dakar 10K" className="tc-img" />
+              </div>
+              
+              <button className="btn-view-all">Voir toutes les compétitions</button>
             </div>
-            
-            <div className="flex flex-col gap-3">
-              <button 
-                onClick={() => {
-                  navigator.clipboard.writeText(profileUrl);
-                  alert("Lien copié !");
-                  setShowQR(false);
-                }}
-                className="w-full py-3.5 bg-gray-900 text-white font-bold rounded-xl shadow-md hover:bg-gray-800 transition active:scale-[0.98]"
-              >
-                Copier le lien
-              </button>
+          </div>
+
+          {/* Right Column (Sidebar) */}
+          <div className="profile-col-right">
+            <div className="sidebar-card">
+              <h4 className="sidebar-title">À propos de moi</h4>
+              <p className="bio-text">
+                Passionné de course à pied depuis mon plus jeune âge. Toujours en quête de nouveaux défis et de performance.
+              </p>
+              <div className="bio-stats">
+                <div className="bio-stat"><User size={16} /> 22 ans</div>
+                <div className="bio-stat"><Activity size={16} /> 1.78 m</div>
+                <div className="bio-stat"><Activity size={16} /> 64 kg</div>
+              </div>
+            </div>
+
+            <div className="sidebar-card">
+              <h4 className="sidebar-title">Sports pratiqués</h4>
+              <div className="sports-tags">
+                <span className="sport-tag">Athlétisme</span>
+                <span className="sport-tag">Course de fond</span>
+                <span className="sport-tag">10K</span>
+                <span className="sport-tag">Semi-Marathon</span>
+                <span className="sport-tag">Marathon</span>
+              </div>
+            </div>
+
+            <div className="sidebar-card">
+              <h4 className="sidebar-title">Réseaux sociaux</h4>
+              <div className="social-icons">
+                <div className="social-icon"><LinkIcon size={16} /></div>
+                <div className="social-icon"><LinkIcon size={16} /></div>
+                <div className="social-icon"><LinkIcon size={16} /></div>
+                <div className="social-icon"><LinkIcon size={16} /></div>
+              </div>
             </div>
           </div>
         </div>
-      )}
+      </main>
     </div>
   );
 };
-
-const StatCard = ({ icon, label, value }: { icon: React.ReactNode, label: string, value: number }) => (
-  <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center">
-    <div className="bg-gray-50 p-2.5 rounded-full mb-3">{icon}</div>
-    <div className="text-3xl font-black text-gray-900 mb-1">{value}</div>
-    <div className="text-xs font-bold text-gray-400 uppercase tracking-widest">{label}</div>
-  </div>
-);
 
 export default PublicIdentityPage;

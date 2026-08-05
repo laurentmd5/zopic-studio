@@ -1,0 +1,213 @@
+.subscription-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #1a1e16; /* Very dark olive/black */
+  color: white;
+}
+
+.subscription-top-nav {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 1.5rem;
+  z-index: 10;
+}
+
+.back-btn-light {
+  background: rgba(255,255,255,0.2);
+  border: none;
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+}
+
+.subscription-hero {
+  position: relative;
+  background-image: url('https://images.unsplash.com/photo-1577223625816-7546f13df25d?w=800&q=80');
+  background-size: cover;
+  background-position: center;
+  padding: 6rem 1.5rem 3rem;
+  border-bottom-left-radius: 24px;
+  border-bottom-right-radius: 24px;
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
+
+.subscription-hero-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(to bottom, rgba(26, 30, 22, 0.4), rgba(26, 30, 22, 1));
+  border-bottom-left-radius: 24px;
+  border-bottom-right-radius: 24px;
+}
+
+.subscription-hero-content {
+  position: relative;
+  z-index: 1;
+}
+
+.subscription-hero-content h3 {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #D4AF37; /* Gold */
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.subscription-hero-content h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.5px;
+}
+
+.subscription-hero-content p {
+  font-size: 0.9rem;
+  color: #cbd5e1;
+  max-width: 280px;
+  margin: 0 auto;
+}
+
+.pricing-cards {
+  padding: 0 1.5rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 3rem;
+}
+
+.pricing-card {
+  background-color: #242a1f;
+  border: 1px solid #3d4a32;
+  border-radius: 16px;
+  padding: 1.25rem 1rem;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.pricing-card.pro {
+  border-color: #5c6c4c;
+}
+
+.card-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.card-title {
+  color: #D4AF37; /* Gold */
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 0.75rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.badge-recommended {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: #8B4513; /* Copper/Brown */
+  color: white;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 8px;
+}
+
+.card-price {
+  color: #D4AF37;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.1;
+}
+
+.price-amount {
+  font-size: 1.75rem;
+  font-weight: 800;
+}
+
+.price-currency {
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.price-period {
+  font-size: 0.7rem;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.features-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: #e5e7eb;
+}
+
+.feature-icon {
+  color: #D4AF37;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.btn-plan {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  border: none;
+  cursor: pointer;
+  color: white;
+  text-align: center;
+}
+
+.btn-basic {
+  background-color: #3A4B29; /* Dark Olive */
+}
+
+.btn-pro {
+  background-color: #8B4513; /* Copper/Brown */
+}
+
+.subscription-footer {
+  text-align: center;
+}
+
+.subscription-footer p {
+  color: #9ca3af;
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+}
+
+.subscription-footer a {
+  color: #e5e7eb;
+  font-size: 0.85rem;
+  text-decoration: underline;
+  font-weight: 500;
+}

@@ -1,22 +1,25 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
-  --color-primary: #121212; /* Noir profond */
-  --color-accent: #3A4B29; /* Vert Olive foncé */
-  --color-accent-light: #E8F5E9; /* Vert très clair pour les badges */
-  --color-background: #FFFFFF; /* Blanc */
-  --color-surface: #F9FAFB; /* Gris très clair pour les cartes */
-  --color-text: #111827; /* Noir texte */
-  --color-text-muted: #6B7280; /* Gris texte */
-  --color-border: #E5E7EB; /* Bordures fines */
-  --color-error: #EF4444;
-  --color-success: #10B981;
+  --color-primary: #3A4B29; /* Vert Olive foncé */
+  --color-primary-light: #4A5D33;
+  --color-background: #FFFFFF;
+  --color-surface: #F9FAFB;
+  --color-text: #111827;
+  --color-text-muted: #6B7280;
+  --color-border: #E5E7EB;
+  --color-gold: #B8860B;
+  
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -32,55 +35,52 @@ a {
 }
 
 /* UI Elements */
-.container {
-  max-width: 600px; /* Mobile first optimal width */
+.app-container {
+  max-width: 430px; /* Mobile width constraint to match mockup feel on desktop */
   margin: 0 auto;
-  padding: 1rem;
+  min-height: 100vh;
+  position: relative;
+  background-color: var(--color-background);
+  box-shadow: 0 0 20px rgba(0,0,0,0.05);
+  overflow-x: hidden;
+  padding-bottom: 80px; /* Space for bottom nav */
 }
 
-.card {
-  background-color: var(--color-surface);
-  border-radius: 12px;
+.container {
   padding: 1.5rem;
-  margin-bottom: 1rem;
-  border: 1px solid var(--color-border);
 }
 
 .btn {
   display: block;
   width: 100%;
   padding: 1rem;
-  border-radius: 8px;
+  border-radius: 12px;
   border: none;
   font-weight: 600;
   font-size: 1rem;
   cursor: pointer;
   text-align: center;
-  transition: opacity 0.2s, background-color 0.2s, border-color 0.2s;
+  transition: all 0.2s;
 }
 
 .btn:active {
-  opacity: 0.8;
+  transform: scale(0.98);
 }
 
 .btn-primary {
-  background-color: var(--color-accent);
+  background-color: var(--color-primary);
   color: #FFFFFF;
 }
 
-.btn-outline {
-  background-color: transparent;
-  color: var(--color-text);
+.btn-white {
+  background-color: #FFFFFF;
+  color: var(--color-primary);
   border: 1px solid var(--color-border);
 }
 
-.btn-outline:hover {
-  background-color: var(--color-surface);
-}
-
-.btn-secondary {
-  background-color: var(--color-surface);
-  color: var(--color-text);
+.btn-gold {
+  background-color: var(--color-gold);
+  color: #FFFFFF;
 }
 
 /* Bottom Navigation */
@@ -89,12 +89,14 @@ a {
   bottom: 0;
   left: 0;
   right: 0;
+  max-width: 430px;
+  margin: 0 auto;
   background-color: #FFFFFF;
   border-top: 1px solid var(--color-border);
   display: flex;
   justify-content: space-around;
-  padding: 0.75rem 0;
-  z-index: 40;
+  padding: 0.75rem 0 1.25rem 0; /* Extra padding at bottom for iOS home indicator */
+  z-index: 50;
 }
 
 .bottom-nav-item {
@@ -103,45 +105,37 @@ a {
   align-items: center;
   gap: 0.25rem;
   color: var(--color-text-muted);
-  font-size: 0.75rem;
+  font-size: 0.65rem;
   font-weight: 500;
+  text-decoration: none;
+  width: 25%;
 }
 
 .bottom-nav-item.active {
-  color: var(--color-accent);
+  color: var(--color-primary);
+}
+
+.bottom-nav-item svg {
+  width: 24px;
+  height: 24px;
+  stroke-width: 2;
+}
+
+.bottom-nav-item.active svg {
+  stroke-width: 2.5;
 }
 
 .header {
-  text-align: center;
-  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  font-weight: 600;
+  font-size: 1.1rem;
 }
 
-.header h1 {
-  color: var(--color-accent);
-  margin-bottom: 0.5rem;
-}
-
-.header p {
-  color: var(--color-text-muted);
-}
-
-.search-modes {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-}
-
-.search-mode-card {
-  background-color: var(--color-surface);
-  border: 2px solid var(--color-border);
-  border-radius: 12px;
-  padding: 1.5rem 1rem;
-  text-align: center;
+.header-back {
+  margin-right: 1rem;
   cursor: pointer;
-}
-
-.search-mode-card:hover {
-  border-color: var(--color-accent);
 }
 
 .search-mode-card svg {

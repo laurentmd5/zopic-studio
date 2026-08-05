@@ -22,6 +22,35 @@ class TimelineResponse(BaseModel):
     total_photos: int
     message: str
 
+# Gallery Models
+class AthleteGalleryCreate(BaseModel):
+    photo_id: int
+    order: Optional[int] = 0
+
+class AthleteGalleryResponse(BaseModel):
+    id: int
+    user_id: int
+    photo_id: int
+    order: int
+    
+    class Config:
+        from_attributes = True
+
+# Share Models
+class AthleteShareCreate(BaseModel):
+    title: str
+    url: str
+
+class AthleteShareResponse(BaseModel):
+    id: int
+    user_id: int
+    title: str
+    url: str
+    type: str
+    
+    class Config:
+        from_attributes = True
+
 # Profile Models
 class AthleteProfileUpdate(BaseModel):
     slug: Optional[str] = Field(None, pattern=r'^[a-z0-9\._-]+$')

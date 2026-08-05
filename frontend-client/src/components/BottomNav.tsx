@@ -4,32 +4,35 @@ import { Home, Search, ShoppingBag, User } from 'lucide-react'
 
 const BottomNav: React.FC = () => {
   const location = useLocation()
-  
-  const navItems = [
-    { path: '/competition/1', icon: <Home size={24} />, label: 'Accueil' },
-    { path: '/competition/1/search', icon: <Search size={24} />, label: 'Recherche' },
-    { path: '/purchases', icon: <ShoppingBag size={24} />, label: 'Achats' },
-    { path: '/identity/activate', icon: <User size={24} />, label: 'Profil' },
-  ]
+  const path = location.pathname
 
-  // Hide BottomNav on public identity page
-  if (location.pathname.startsWith('/@')) {
+  // Don't show bottom nav on specific pages
+  if (path === '/checkout' || path === '/payment' || path === '/identity/activate' || path === '/profile/edit' || path === '/auth') {
     return null
   }
 
   return (
-    <div className="bottom-nav">
-      {navItems.map((item) => (
-        <Link 
-          key={item.label} 
-          to={item.path} 
-          className={`bottom-nav-item ${location.pathname === item.path ? 'active' : ''}`}
-        >
-          {item.icon}
-          <span>{item.label}</span>
-        </Link>
-      ))}
-    </div>
+    <nav className="bottom-nav">
+      <Link to="/" className={`bottom-nav-item ${path === '/' ? 'active' : ''}`}>
+        <Home size={24} />
+        <span>Accueil</span>
+      </Link>
+      
+      <Link to="/competition/1/search" className={`bottom-nav-item ${path.includes('/search') ? 'active' : ''}`}>
+        <Search size={24} />
+        <span>Recherche</span>
+      </Link>
+      
+      <Link to="/purchases" className={`bottom-nav-item ${path === '/purchases' ? 'active' : ''}`}>
+        <ShoppingBag size={24} />
+        <span>Achats</span>
+      </Link>
+      
+      <Link to="/dashboard" className={`bottom-nav-item ${path.startsWith('/dashboard') || path.startsWith('/timeline') || path.startsWith('/profile') ? 'active active-profil' : ''}`}>
+        <User size={24} />
+        <span>Profil</span>
+      </Link>
+    </nav>
   )
 }
 

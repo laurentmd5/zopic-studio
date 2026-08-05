@@ -1,0 +1,194 @@
+.payment-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--color-background);
+  padding-bottom: 120px;
+}
+
+.payment-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  position: relative;
+}
+
+.payment-header .back-btn {
+  position: absolute;
+  left: 1.5rem;
+  background: none;
+  border: none;
+  color: var(--color-text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.payment-header .page-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.payment-content {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.amount-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.amount-label {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.amount-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--color-primary);
+}
+
+.payment-methods-title {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+  margin-top: 1rem;
+}
+
+.payment-methods-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.payment-method-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-background);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.payment-method-card.active {
+  border-color: var(--color-primary);
+  background-color: #F4F6F0;
+}
+
+.payment-method-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.payment-method-logo {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.payment-method-name {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.radio-btn {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.payment-method-card.active .radio-btn {
+  border-color: var(--color-primary);
+}
+
+.radio-btn-inner {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--color-primary);
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all 0.2s;
+}
+
+.payment-method-card.active .radio-btn-inner {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.payment-sticky-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-width: 430px;
+  margin: 0 auto;
+  background-color: white;
+  padding: 1rem 1.5rem;
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  z-index: 60;
+}
+
+.payment-btn {
+  width: 100%;
+  padding: 1rem;
+  border-radius: 12px;
+  background-color: var(--color-primary);
+  color: white;
+  font-weight: 700;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+}
+
+.secure-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.secure-text svg {
+  color: var(--color-primary);
+}
+
+.payment-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+}
+
+.payment-status {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+}

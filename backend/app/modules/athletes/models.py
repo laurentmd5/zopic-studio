@@ -62,3 +62,32 @@ class AthleteStatistics(Base):
     updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
     
     user = relationship("User", backref="statistics")
+
+class ShareType(str, enum.Enum):
+    YOUTUBE = "YOUTUBE"
+    ARTICLE = "ARTICLE"
+    LINK = "LINK"
+
+class AthleteGallery(Base):
+    __tablename__ = "athlete_gallery"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    photo_id = Column(Integer, ForeignKey("photos.id"), nullable=False)
+    order = Column(Integer, default=0)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    
+    user = relationship("User", backref="gallery_items")
+    photo = relationship("Photo")
+
+class AthleteShare(Base):
+    __tablename__ = "athlete_shares"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    title = Column(String, nullable=False)
+    url = Column(String, nullable=False)
+    type = Column(String, default=ShareType.LINK)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    
+    user = relationship("User", backref="shared_links")
