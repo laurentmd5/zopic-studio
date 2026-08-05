@@ -16,9 +16,9 @@ from app.modules.competitions import models as competitions_models
 from app.modules.payments import models as payments_models
 from app.modules.subscriptions import models as subscriptions_models
 from app.modules.athletes import models as athletes_models
-from app.modules.favorites import models as favorites_models
-from app.modules.storage import models as storage_models
 from app.modules.downloads import models as downloads_models
+from app.modules.archives import models as archives_models
+from app.modules.audit import models as audit_models
 
 async def check_and_create_tables():
     # Enforce asyncpg dialect for Alembic if not in URL
