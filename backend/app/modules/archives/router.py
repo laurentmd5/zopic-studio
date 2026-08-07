@@ -84,10 +84,10 @@ async def create_archive(
     # L'API backend est par ex: http://backend:8000/api/v1/orders/{order_id}/archives/{archive.id}/callback
     backend_url = os.getenv("BACKEND_URL", "http://backend:8000")
     from app.core.config import settings
-    callback_url = f"{backend_url}/api/v1/orders/{order_id}/archives/{archive.id}/callback?secret={settings.SECRET_KEY}"
+    callback_url = f"{backend_url}/api/v1/orders/{order_id}/archives/{archive.id}/callback"
     
     redis = await get_redis_pool()
-    await redis.enqueue_job("generate_zip", archive.id, s3_keys, callback_url, _queue_name='arq:ai_queue')
+    await redis.enqueue_job("generate_zip", archive.id, s3_keys, callback_url, settings.SECRET_KEY, _queue_name='arq:ai_queue')
     
     archive.status = ArchiveStatus.PROCESSING
     await db.commit()
@@ -105,14 +105,14 @@ async def archive_callback(
     order_id: int,
     archive_id: int,
     payload: ArchiveCallback,
-    secret: str = None,
+    x_archive_secret: str = Header(None),
     db: AsyncSession = Depends(get_db)
 ):
     """
     Webhook interne appelé par le Worker quand le ZIP est prêt.
     """
     from app.core.config import settings
-    if secret != settings.SECRET_KEY:
+    if x_archive_secret != settings.SECRET_KEY:
         raise HTTPException(status_code=403, detail="Invalid callback secret")
         
     archive_res = await db.execute(select(Archive).where(Archive.id == archive_id))

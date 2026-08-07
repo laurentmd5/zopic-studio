@@ -90,7 +90,7 @@ import zipfile
 import io
 import aiohttp
 
-async def generate_zip(ctx, archive_id: int, s3_keys: list[str], callback_url: str):
+async def generate_zip(ctx, archive_id: int, s3_keys: list[str], callback_url: str, callback_secret: str):
     logger.info(f"Generation de l'archive ZIP {archive_id} pour {len(s3_keys)} fichiers...")
     
     try:
@@ -129,7 +129,8 @@ async def generate_zip(ctx, archive_id: int, s3_keys: list[str], callback_url: s
             async with aiohttp.ClientSession() as http_session:
                 await http_session.post(
                     callback_url,
-                    json={"status": "COMPLETED", "s3_object_key": zip_key, "size": len(zip_buffer.getvalue())}
+                    json={"status": "COMPLETED", "s3_object_key": zip_key, "size": len(zip_buffer.getvalue())},
+                    headers={"X-Archive-Secret": callback_secret}
                 )
                 
             logger.info(f"Archive {archive_id} generee avec succes.")
@@ -140,7 +141,8 @@ async def generate_zip(ctx, archive_id: int, s3_keys: list[str], callback_url: s
         async with aiohttp.ClientSession() as http_session:
             await http_session.post(
                 callback_url,
-                json={"status": "FAILED"}
+                json={"status": "FAILED"},
+                headers={"X-Archive-Secret": callback_secret}
             )
         return False
 

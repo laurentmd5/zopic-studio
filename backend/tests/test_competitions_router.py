@@ -12,7 +12,7 @@ async def test_create_competition(async_client, db_session):
         "name": "Super Event",
         "date": "2024-01-01T00:00:00Z",
         "is_public": True,
-        "settings": {"price_xof": 1500}
+        "settings": {"price_xof": 1500, "sport": "Football"}
     }
     
     mock_resp = {
@@ -20,7 +20,7 @@ async def test_create_competition(async_client, db_session):
         "name": "Super Event",
         "date": "2024-01-01T00:00:00Z",
         "is_public": True,
-        "settings": {"price_xof": 1500},
+        "settings": {"price_xof": 1500, "sport": "Football"},
         "photographer_id": user.id,
         "created_at": "2024-01-01T00:00:00Z"
     }
@@ -48,6 +48,7 @@ async def test_get_competition(async_client):
         is_public=True,
         photographer_id=1,
         packs_enabled=False,
+        settings={"sport": "Football", "price_xof": 1500},
         created_at=datetime.now()
     )
     with patch("app.modules.competitions.service.get_competition", new_callable=AsyncMock) as mock_srv:
@@ -67,6 +68,7 @@ async def test_list_competitions(async_client):
         is_public=True,
         photographer_id=1,
         packs_enabled=False,
+        settings={"sport": "Football", "price_xof": 1500},
         created_at=datetime.now()
     )]
     with patch("app.modules.competitions.service.get_competitions", new_callable=AsyncMock) as mock_srv:
@@ -83,7 +85,7 @@ async def test_create_epreuve(async_client, db_session):
     
     from app.modules.competitions.models import Competition, Epreuve
     from datetime import datetime
-    comp = Competition(name="Test Comp", date=datetime.now(), photographer_id=user.id)
+    comp = Competition(name="Test Comp", date=datetime.now(), photographer_id=user.id, settings={"sport": "Football", "price_xof": 1500})
     db_session.add(comp)
     await db_session.commit()
     

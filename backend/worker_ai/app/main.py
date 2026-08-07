@@ -1,5 +1,5 @@
 import os
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Depends, Header
 from qdrant_client import AsyncQdrantClient
 
 from app.services.face_analyzer import face_analyzer
@@ -7,13 +7,18 @@ from app.services.face_analyzer import face_analyzer
 app = FastAPI(title="ZoPic Studio - AI Worker API")
 
 QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
+AI_INTERNAL_TOKEN = os.getenv("AI_INTERNAL_TOKEN", "changeme")
+
+async def verify_token(ai_internal_token: str = Header(..., alias="X-AI-Internal-Token")):
+    if ai_internal_token != AI_INTERNAL_TOKEN:
+        raise HTTPException(status_code=401, detail="Invalid internal token")
 
 @app.get("/health")
 async def health_check():
     return {"status": "ok", "service": "worker-ai"}
 
 from fastapi import Form
-@app.post("/search")
+@app.post("/search", dependencies=[Depends(verify_token)])
 async def search_faces(
     competition_id: int = Form(...),
     file: UploadFile = File(...)
@@ -62,7 +67,7 @@ async def search_faces(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/forget")
+@app.post("/forget", dependencies=[Depends(verify_token)])
 async def forget_faces(
     competition_id: int = Form(...),
     file: UploadFile = File(...)

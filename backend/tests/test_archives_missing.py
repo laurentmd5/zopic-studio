@@ -61,8 +61,9 @@ async def test_archive_callback(async_client, db_session):
     
     from app.core.config import settings
     response = await async_client.post(
-        f"/api/v1/orders/1/archives/1/callback?secret={settings.SECRET_KEY}",
-        json={"status": "COMPLETED", "s3_object_key": "zips/test.zip", "size": 1024}
+        f"/api/v1/orders/{order.id}/archives/{archive.id}/callback",
+        json={"status": "COMPLETED", "s3_object_key": "zips/test.zip", "size": 1024},
+        headers={"x-archive-secret": settings.SECRET_KEY}
     )
     assert response.status_code == 200
     

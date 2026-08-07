@@ -14,6 +14,7 @@ from app.modules.competitions.models import Photo, Epreuve, Competition
 router = APIRouter(prefix="/faces", tags=["Face Recognition"])
 
 AI_API_URL = os.getenv("AI_API_URL", "http://localhost:8001")
+AI_INTERNAL_TOKEN = os.getenv("AI_INTERNAL_TOKEN", "changeme")
 
 def get_session_id(request: Request) -> str:
     # Basic session extraction for audit
@@ -60,6 +61,7 @@ async def search_faces(
                 f"{AI_API_URL}/search",
                 data={"competition_id": competition_id},
                 files={"file": (file.filename, content, file.content_type)},
+                headers={"X-AI-Internal-Token": AI_INTERNAL_TOKEN},
                 timeout=30.0
             )
             
@@ -136,6 +138,7 @@ async def forget_faces(
                 f"{AI_API_URL}/forget",
                 data={"competition_id": competition_id},
                 files={"file": (file.filename, content, file.content_type)},
+                headers={"X-AI-Internal-Token": AI_INTERNAL_TOKEN},
                 timeout=30.0
             )
             

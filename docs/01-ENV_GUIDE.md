@@ -49,3 +49,14 @@ QDRANT_API_KEY= # Optionnel en local
 
 > [!CAUTION]
 > Ne versionnez jamais votre fichier `.env`. Il est listé dans le `.gitignore`.
+
+---
+
+## Versions de Python (Divergence MVP)
+
+> [!NOTE]
+> Actuellement, le projet utilise deux versions de Python distinctes :
+> - **Backend** : Python 3.13 (pour la rapidité, la compatibilité asyncio et les nouveautés de la syntaxe)
+> - **Worker IA** : Python 3.11 (car InsightFace et certaines dépendances ONNX Runtime n'ont pas encore de *wheels* natives ou de compatibilité garantie avec 3.13)
+>
+> **Décision (Phase 1 / MVP)** : Cet écart est volontaire et documenté. Il permet de bénéficier des performances de 3.13 sur l'API principale tout en garantissant la stabilité du worker biométrique. L'uniformisation se fera en **Phase 2** lorsque l'écosystème IA aura rattrapé Python 3.13.

@@ -30,14 +30,43 @@ pipeline {
         }
 
         // =====================================================================
-        // STAGE 2 : LINTING
+        // STAGE 2 : INSTALL DEPENDENCIES
+        // =====================================================================
+        stage('Install Dependencies') {
+            parallel {
+                stage('Install Backend') {
+                    steps {
+                        dir('backend') {
+                            sh 'curl -LsSf https://astral.sh/uv/install.sh | sh || true'
+                            sh 'export PATH="${HOME}/.local/bin:${PATH}" && uv sync'
+                        }
+                    }
+                }
+                stage('Install Frontend Web') {
+                    steps {
+                        dir('frontend-web') {
+                            sh 'docker run --rm -v "${WORKSPACE}/frontend-web:/app" -v npm-cache:/root/.npm -w /app node:22-alpine npm install'
+                        }
+                    }
+                }
+                stage('Install Frontend Client') {
+                    steps {
+                        dir('frontend-client') {
+                            sh 'docker run --rm -v "${WORKSPACE}/frontend-client:/app" -v npm-cache:/root/.npm -w /app node:22-alpine npm install'
+                        }
+                    }
+                }
+            }
+        }
+
+        // =====================================================================
+        // STAGE 3 : LINTING
         // =====================================================================
         stage('Linting') {
             parallel {
                 stage('Lint Backend') {
                     steps {
                         dir('backend') {
-                            sh 'curl -LsSf https://astral.sh/uv/install.sh | sh || true'
                             sh 'export PATH="${HOME}/.local/bin:${PATH}" && uv run ruff check .'
                         }
                     }
@@ -45,14 +74,14 @@ pipeline {
                 stage('Lint Frontend Web') {
                     steps {
                         dir('frontend-web') {
-                            sh 'docker run --rm -v "${WORKSPACE}/frontend-web:/app" -w /app node:22-alpine sh -c "npm install && npm run lint"'
+                            sh 'docker run --rm -v "${WORKSPACE}/frontend-web:/app" -w /app node:22-alpine npm run lint'
                         }
                     }
                 }
                 stage('Lint Frontend Client') {
                     steps {
                         dir('frontend-client') {
-                            sh 'docker run --rm -v "${WORKSPACE}/frontend-client:/app" -w /app node:22-alpine sh -c "npm install && npm run lint"'
+                            sh 'docker run --rm -v "${WORKSPACE}/frontend-client:/app" -w /app node:22-alpine npm run lint'
                         }
                     }
                 }
@@ -75,7 +104,7 @@ pipeline {
         }
 
         // =====================================================================
-        // STAGE 3 : TESTS UNITAIRES
+        // STAGE 4 : TESTS UNITAIRES
         // =====================================================================
         stage('Tests Unitaires') {
             parallel {
@@ -84,7 +113,7 @@ pipeline {
                         dir('backend') {
                             script {
                                 echo 'Exécution des tests backend avec pytest...'
-                                sh 'export PATH="${HOME}/.local/bin:${PATH}" && uv sync && cp .env.example .env || true && uv run pytest tests/'
+                                sh 'export PATH="${HOME}/.local/bin:${PATH}" && cp .env.example .env || true && uv run pytest tests/'
                             }
                         }
                     }
@@ -93,7 +122,7 @@ pipeline {
                     steps {
                         dir('frontend-web') {
                             echo 'Exécution des tests Frontend Web avec Vitest...'
-                            sh 'docker run --rm -v "${WORKSPACE}/frontend-web:/app" -w /app node:22-alpine sh -c "npm install && npm run test -- --run"'
+                            sh 'docker run --rm -v "${WORKSPACE}/frontend-web:/app" -w /app node:22-alpine npm run test -- --run'
                         }
                     }
                 }
@@ -101,7 +130,7 @@ pipeline {
                     steps {
                         dir('frontend-client') {
                             echo 'Exécution des tests Frontend Client avec Vitest...'
-                            sh 'docker run --rm -v "${WORKSPACE}/frontend-client:/app" -w /app node:22-alpine sh -c "npm install && npm run test -- --run"'
+                            sh 'docker run --rm -v "${WORKSPACE}/frontend-client:/app" -w /app node:22-alpine npm run test -- --run'
                         }
                     }
                 }
@@ -109,7 +138,7 @@ pipeline {
         }
         
         // =====================================================================
-        // STAGE 4 : BUILD (DOCKER)
+        // STAGE 5 : BUILD (DOCKER)
         // =====================================================================
         stage('Build Docker Images') {
             parallel {
@@ -130,7 +159,7 @@ pipeline {
         }
 
         // =====================================================================
-        // STAGE 5 : SECURITY SCAN (SAST / Container)
+        // STAGE 6 : SECURITY SCAN (SAST / Container)
         // =====================================================================
         stage('Security Scan') {
             steps {
@@ -143,7 +172,7 @@ pipeline {
         }
         
         // =====================================================================
-        // STAGE 6 : PREPARER LE DEPLOIEMENT
+        // STAGE 7 : PREPARER LE DEPLOIEMENT
         // =====================================================================
         stage('Preparer Deploiement') {
             steps {
@@ -172,7 +201,7 @@ pipeline {
         }
 
         // =====================================================================
-        // STAGE 7 : REDEMARRER
+        // STAGE 8 : REDEMARRER
         // =====================================================================
         stage('Redemarrer Services') {
             steps {
@@ -187,7 +216,7 @@ pipeline {
         }
 
         // =====================================================================
-        // STAGE 8 : MIGRATION DB & INIT DATA
+        // STAGE 9 : MIGRATION DB & INIT DATA
         // =====================================================================
         stage('Migration DB & Init Data') {
             steps {
@@ -203,7 +232,7 @@ pipeline {
         }
 
         // =====================================================================
-        // STAGE 9 : E2E TESTS (Playwright)
+        // STAGE 10 : E2E TESTS (Playwright)
         // =====================================================================
         stage('E2E Tests') {
             steps {
@@ -215,7 +244,7 @@ pipeline {
         }
 
         // =====================================================================
-        // STAGE 10 : DAST (Dynamic Application Security Testing)
+        // STAGE 11 : DAST (Dynamic Application Security Testing)
         // =====================================================================
         stage('DAST (ZAP Scan)') {
             steps {
@@ -227,7 +256,7 @@ pipeline {
         }
 
         // =====================================================================
-        // STAGE 11 : NETTOYER
+        // STAGE 12 : NETTOYER
         // =====================================================================
         stage('Nettoyer') {
             steps {

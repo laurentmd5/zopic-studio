@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from datetime import datetime
 from typing import List, Optional
 from app.modules.competitions.models import PhotoStatus
@@ -40,13 +40,23 @@ class PackConfig(BaseModel):
     price_xof: int
     label: str
 
+class CompetitionSettings(BaseModel):
+    location: Optional[str] = None
+    sport: str
+    categories: Optional[List[str]] = None
+    price_xof: int = Field(ge=200)
+    packs: Optional[List[PackConfig]] = None
+    watermark_text: Optional[str] = None
+    allow_guest_downloads: Optional[bool] = True
+    whatsapp_delivery: Optional[bool] = False
+
 class CompetitionBase(BaseModel):
     name: str
     description: Optional[str] = None
     date: datetime
     is_public: bool = True
     access_code: Optional[str] = None
-    settings: Optional[dict] = {}
+    settings: Optional[CompetitionSettings] = None
     packs_enabled: bool = False
     packs: Optional[List[PackConfig]] = None
 

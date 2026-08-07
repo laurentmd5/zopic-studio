@@ -8,7 +8,7 @@ from app.main import app
 
 @pytest.mark.asyncio
 async def test_read_event_private_wrong_code(async_client, db_session):
-    comp = Competition(name="Priv", date=datetime.now(timezone.utc), photographer_id=1, is_public=False, access_code="SECRET")
+    comp = Competition(name="Priv", date=datetime.now(timezone.utc), photographer_id=1, is_public=False, access_code="SECRET", settings={"sport": "Football", "price_xof": 1500})
     db_session.add(comp)
     await db_session.commit()
     
@@ -23,7 +23,7 @@ async def test_update_packs_not_authorized(async_client, db_session):
     db_session.add(user2)
     await db_session.commit()
     
-    comp = Competition(name="Comp", date=datetime.now(timezone.utc), photographer_id=user1.id, is_public=True)
+    comp = Competition(name="Comp", date=datetime.now(timezone.utc), photographer_id=user1.id, is_public=True, settings={"sport": "Football", "price_xof": 1500})
     db_session.add(comp)
     await db_session.commit()
     
@@ -41,7 +41,7 @@ async def test_update_packs_success(async_client, db_session):
     db_session.add(user)
     await db_session.commit()
     
-    comp = Competition(name="Comp", date=datetime.now(timezone.utc), photographer_id=user.id, is_public=True)
+    comp = Competition(name="Comp", date=datetime.now(timezone.utc), photographer_id=user.id, is_public=True, settings={"sport": "Football", "price_xof": 1500})
     db_session.add(comp)
     await db_session.commit()
     
@@ -57,7 +57,7 @@ async def test_update_packs_success(async_client, db_session):
 
 @pytest.mark.asyncio
 async def test_get_packs_success(async_client, db_session):
-    comp = Competition(name="Comp", date=datetime.now(timezone.utc), photographer_id=1, is_public=True, packs_enabled=True, packs=[{"label": "Pack1", "price_xof": 1000, "quantity": 5}])
+    comp = Competition(name="Comp", date=datetime.now(timezone.utc), photographer_id=1, is_public=True, packs_enabled=True, packs=[{"label": "Pack1", "price_xof": 1000, "quantity": 5}], settings={"sport": "Football", "price_xof": 1500})
     db_session.add(comp)
     await db_session.commit()
     
