@@ -4,6 +4,9 @@ import aioboto3
 from arq.connections import RedisSettings
 from qdrant_client import AsyncQdrantClient
 from qdrant_client.http import models
+import logging
+
+logger = logging.getLogger(__name__)
 
 from app.services.face_analyzer import face_analyzer
 
@@ -15,7 +18,7 @@ S3_SECRET_KEY = os.getenv("S3_SECRET_KEY", "minioadmin")
 S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME", "zopic-studio")
 
 async def extract_faces(ctx, photo_id: int, event_id: int, album_id: int, original_key: str):
-    print(f"Extraction des visages pour la photo {photo_id} ({original_key})...")
+    logger.info(f"Extraction des visages pour la photo {photo_id}...")
     
     try:
         # 1. Download image from MinIO
@@ -34,13 +37,16 @@ async def extract_faces(ctx, photo_id: int, event_id: int, album_id: int, origin
         embeddings = face_analyzer.extract_faces(image_data)
         
         if not embeddings:
-            print(f"Aucun visage detecte dans la photo {photo_id}.")
+            logger.info(f"Aucun visage detecte dans la photo {photo_id}.")
             return False
             
-        print(f"{len(embeddings)} visage(s) detecte(s) dans la photo {photo_id}.")
+        logger.info(f"{len(embeddings)} visage(s) detecte(s) dans la photo {photo_id}.")
         
         # 3. Store in Qdrant
         qdrant = AsyncQdrantClient(url=QDRANT_URL)
+        
+        import time
+        from datetime import datetime, timezone
         
         points = []
         for emb in embeddings:
@@ -53,19 +59,31 @@ async def extract_faces(ctx, photo_id: int, event_id: int, album_id: int, origin
                         "photo_id": photo_id,
                         "event_id": event_id,
                         "album_id": album_id,
-                        "original_key": original_key
+                        "original_key": original_key,
+                        "created_at": int(time.time()),
+                        "model_version": "v1.0"
                     }
                 )
             )
             
+        collection_name = f"faces_v1_{event_id}"
+        
+        # Ensure collection exists
+        if not await qdrant.collection_exists(collection_name):
+            from qdrant_client.http import models as qmodels
+            await qdrant.create_collection(
+                collection_name=collection_name,
+                vectors_config=qmodels.VectorParams(size=len(embeddings[0]), distance=qmodels.Distance.COSINE)
+            )
+
         await qdrant.upsert(
-            collection_name="faces",
+            collection_name=collection_name,
             points=points
         )
         
         return True
     except Exception as e:
-        print(f"Erreur lors de l'extraction de la photo {photo_id}: {e}")
+        logger.error(f"Erreur lors de l'extraction de la photo {photo_id}", exc_info=True)
         return False
 
 import zipfile
@@ -73,7 +91,7 @@ import io
 import aiohttp
 
 async def generate_zip(ctx, archive_id: int, s3_keys: list[str], callback_url: str):
-    print(f"Generation de l'archive ZIP {archive_id} pour {len(s3_keys)} fichiers...")
+    logger.info(f"Generation de l'archive ZIP {archive_id} pour {len(s3_keys)} fichiers...")
     
     try:
         session = aioboto3.Session()
@@ -95,7 +113,7 @@ async def generate_zip(ctx, archive_id: int, s3_keys: list[str], callback_url: s
                         filename = key.split('/')[-1]
                         zip_file.writestr(filename, file_data)
                     except Exception as e:
-                        print(f"Erreur lors du telechargement de {key}: {e}")
+                        logger.error(f"Erreur lors du telechargement d'un fichier pour l'archive {archive_id}", exc_info=True)
             
             zip_buffer.seek(0)
             zip_key = f"archives/archive_{archive_id}.zip"
@@ -114,11 +132,11 @@ async def generate_zip(ctx, archive_id: int, s3_keys: list[str], callback_url: s
                     json={"status": "COMPLETED", "s3_object_key": zip_key, "size": len(zip_buffer.getvalue())}
                 )
                 
-            print(f"Archive {archive_id} generee avec succes: {zip_key}")
+            logger.info(f"Archive {archive_id} generee avec succes.")
             return True
             
     except Exception as e:
-        print(f"Erreur lors de la generation de l'archive {archive_id}: {e}")
+        logger.error(f"Erreur lors de la generation de l'archive {archive_id}", exc_info=True)
         async with aiohttp.ClientSession() as http_session:
             await http_session.post(
                 callback_url,
@@ -129,4 +147,4 @@ async def generate_zip(ctx, archive_id: int, s3_keys: list[str], callback_url: s
 class WorkerSettings:
     redis_settings = RedisSettings.from_dsn(REDIS_URL)
     functions = [extract_faces, generate_zip]
-    queue_name = 'arq:ai_queue' # On utilise une queue diffÃ©rente pour l'IA
+    queue_name = 'arq:ai_queue' # On utilise une queue différente pour l'IA

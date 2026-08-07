@@ -1,5 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Request
 from sqlalchemy.ext.asyncio import AsyncSession
+import hmac
+import hashlib
 from typing import Dict, Any
 
 from app.core.database import get_db
@@ -8,6 +10,8 @@ from app.modules.payments.schemas import OrderCreate, OrderResponse, PaydunyaWeb
 from app.modules.payments import service
 
 router = APIRouter(prefix="/payments", tags=["Payments"])
+
+from app.core.config import settings
 
 from app.modules.auth.service import get_current_user_optional
 
@@ -24,18 +28,28 @@ async def create_order(
     user_id = current_user.id if current_user else None
     return await service.create_order(db, order_data, user_id, x_session_id)
 
-@router.post("/webhook/paydunya")
+@router.post("/paydunya-webhook")
 async def paydunya_webhook(
     request: Request,
     payload: PaydunyaWebhook,
+    paydunya_signature: str | None = Header(None),
     db: AsyncSession = Depends(get_db)
 ):
     """
     Webhook officiel PayDunya (IPN).
-    En production, on vÃ©rifierait le master_key et le hash ici.
-    Pour l'instant, on lit juste le token et le statut de la requÃªte form-data ou JSON.
+    Vérifie la signature HMAC avant de traiter le paiement.
     """
-    # Ex: on suppose que PayDunya envoie le token dans data.token et le statut dans data.status
+    if not paydunya_signature:
+        raise HTTPException(status_code=403, detail="Signature manquante")
+        
+    # Validation HMAC SHA256
+    body = await request.body()
+    secret_bytes = settings.PAYMENT_WEBHOOK_SECRET.encode('utf-8')
+    computed_hmac = hmac.new(secret_bytes, body, hashlib.sha256).hexdigest()
+    
+    if not hmac.compare_digest(computed_hmac, paydunya_signature):
+        raise HTTPException(status_code=403, detail="Signature invalide")
+        
     data = payload.data
     token = data.get("token")
     status_str = data.get("status")
@@ -55,6 +69,9 @@ async def simulate_webhook(
     """
     Route utilitaire (dev) pour simuler un webhook PayDunya.
     """
+    if not getattr(settings, "PAYMENT_SIMULATION_MODE", False):
+        raise HTTPException(status_code=403, detail="Simulation non autorisée en production")
+        
     is_success = (status == "completed")
     return await service.process_webhook(db, token, is_success)
 

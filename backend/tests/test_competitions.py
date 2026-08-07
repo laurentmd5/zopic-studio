@@ -17,35 +17,36 @@ async def test_create_competition():
     mock_db.add.assert_called_once()
     mock_db.commit.assert_awaited_once()
 
+from datetime import datetime, timezone
 @pytest.mark.asyncio
-async def test_add_photo():
-    mock_db = AsyncMock()
-    mock_photo = schemas.PhotoCreate(s3_object_key="originals/test.jpg")
+async def test_add_photo(db_session):
+    # Prepare DB
+    from app.modules.auth.models import User
+    user = User(id=1, phone_number="+2211234567")
+    db_session.add(user)
     
-    # Mock db.execute().scalars().first() for Epreuve fetch
-    mock_result = MagicMock()
-    mock_scalars = MagicMock()
-    mock_epreuve = MagicMock(competition_id=5)
-    mock_scalars.first.return_value = mock_epreuve
-    mock_result.scalars.return_value = mock_scalars
-    mock_db.execute.return_value = mock_result
+    comp = Competition(id=5, name="C", photographer_id=1, date=datetime.now(timezone.utc))
+    db_session.add(comp)
+    
+    ep = Epreuve(id=10, competition_id=5, name="E")
+    db_session.add(ep)
+    await db_session.commit()
+    
+    mock_photo = schemas.PhotoCreate(s3_object_key="originals/test.jpg", file_size_bytes=100)
 
-    # On mock create_pool pour ne pas dÃƒÂ©clencher Redis
+    # Mock Redis
     with patch('app.modules.competitions.service.create_pool', new_callable=AsyncMock) as mock_create_pool:
         mock_redis = AsyncMock()
         mock_create_pool.return_value = mock_redis
         
-        photo = await service.add_photo(mock_db, epreuve_id=10, photo_data=mock_photo)
+        photo = await service.add_photo(db_session, epreuve_id=10, photo_data=mock_photo)
         
         assert photo.epreuve_id == 10
         assert photo.s3_object_key == "originals/test.jpg"
         assert photo.watermark_s3_key == "watermarks/test.jpg"
         assert photo.status == PhotoStatus.UPLOADED
-        
-        mock_db.add.assert_called_once()
-        mock_db.commit.assert_awaited_once()
 
-        # VÃƒÂ©rifie que les jobs ont ÃƒÂ©tÃƒÂ© mis en queue
+        # Vérifie que les jobs ont été mis en queue
         assert mock_redis.enqueue_job.await_count == 2
         # Verify call to generate_watermark
         mock_redis.enqueue_job.assert_any_call(

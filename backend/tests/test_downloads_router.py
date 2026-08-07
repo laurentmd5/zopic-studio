@@ -36,7 +36,7 @@ async def test_download_photo_success(async_client, db_session):
         mock_url.return_value = "http://presigned.url"
         
         res = await async_client.get(
-            f"/orders/{order.id}/photos/{photo.id}/download",
+            f"/api/v1/orders/{order.id}/photos/{photo.id}/download",
             headers={"x-session-id": "sess_1"}
         )
         
@@ -59,7 +59,7 @@ async def test_download_photo_no_permission(async_client, db_session):
     await db_session.commit()
     
     res = await async_client.get(
-        f"/orders/{order.id}/photos/{photo.id}/download",
+        f"/api/v1/orders/{order.id}/photos/{photo.id}/download",
         headers={"x-session-id": "sess_2"}
     )
     

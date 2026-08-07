@@ -86,7 +86,7 @@
 
 .metaInfo {
   font-size: 0.9rem;
-  color: var(--secondary-color);
+  color: var(--text-muted);
 }
 
 .metaInfo p {
@@ -114,7 +114,7 @@
 
 .tagDesc {
   font-size: 0.8rem;
-  color: var(--secondary-color);
+  color: var(--text-muted);
   margin-bottom: 1rem;
 }
 

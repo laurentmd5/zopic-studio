@@ -17,7 +17,7 @@
 }
 
 .subtitle {
-  color: var(--secondary-color);
+  color: var(--text-muted);
   font-size: 0.95rem;
 }
 
@@ -57,7 +57,7 @@
 }
 
 .searchIcon {
-  color: var(--secondary-color);
+  color: var(--text-muted);
 }
 
 .searchBar input {
@@ -151,7 +151,7 @@
 .iconBtn {
   background: none;
   border: none;
-  color: var(--secondary-color);
+  color: var(--text-muted);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -161,7 +161,7 @@
 .cardMeta {
   display: flex;
   gap: 1rem;
-  color: var(--secondary-color);
+  color: var(--text-muted);
   font-size: 0.85rem;
 }
 
@@ -213,7 +213,7 @@
   background: none;
   border: none;
   font-size: 1.5rem;
-  color: var(--secondary-color);
+  color: var(--text-muted);
   cursor: pointer;
 }
 

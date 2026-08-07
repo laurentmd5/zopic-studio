@@ -17,7 +17,8 @@ async def test_search_faces_ai_error(async_client):
     
     with patch("app.modules.face_recognition.router.httpx.AsyncClient", mock_client_class):
         response = await async_client.post(
-            "/faces/search",
+            "/api/v1/faces/search",
+            data={"competition_id": 1, "consent": True},
             files={"file": ("test.jpg", file_content, "image/jpeg")}
         )
         assert response.status_code == 500
@@ -35,7 +36,8 @@ async def test_search_faces_network_error(async_client):
     
     with patch("app.modules.face_recognition.router.httpx.AsyncClient", mock_client_class):
         response = await async_client.post(
-            "/faces/search",
+            "/api/v1/faces/search",
+            data={"competition_id": 1, "consent": True},
             files={"file": ("test.jpg", file_content, "image/jpeg")}
         )
         assert response.status_code == 503

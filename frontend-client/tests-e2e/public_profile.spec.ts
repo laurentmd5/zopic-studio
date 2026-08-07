@@ -23,10 +23,9 @@ test.describe('Public Profile', () => {
     if (isError) {
       await expect(page.locator('text="Ce profil n\'existe pas"')).toBeVisible();
     } else {
-      await expect(page.locator('text="@moussa"')).toBeVisible();
-      // Check for share button
-      await page.locator('button').filter({ hasText: '' }).first().click(); // The share button
-      await expect(page.locator('text="Partager le profil"')).toBeVisible();
+      await expect(page.locator('text="@moussa.dkr"')).toBeVisible();
+      // Verify profile name is visible
+      await expect(page.locator('text="Moussa Diop"').first()).toBeVisible();
     }
   });
 

@@ -34,7 +34,7 @@
 
 .statHeader h3 {
   font-size: 0.95rem;
-  color: var(--secondary-color);
+  color: var(--text-muted);
   font-weight: 500;
 }
 
@@ -47,9 +47,9 @@
   justify-content: center;
 }
 
-.iconWrapper.green { background-color: rgba(107, 142, 35, 0.1); color: var(--primary-color); }
-.iconWrapper.blue { background-color: rgba(33, 150, 243, 0.1); color: #2196f3; }
-.iconWrapper.orange { background-color: rgba(255, 152, 0, 0.1); color: #ff9800; }
+.iconWrapper.green { background-color: var(--success-bg); color: var(--success); }
+.iconWrapper.blue { background-color: var(--info-bg); color: var(--info); }
+.iconWrapper.orange { background-color: var(--warning-bg); color: var(--warning); }
 
 .statValue {
   font-size: 1.75rem;
@@ -125,7 +125,7 @@
 }
 
 .storageWarning {
-  color: var(--secondary-color);
+  color: var(--text-muted);
   font-size: 0.85rem;
 }
 
@@ -156,7 +156,7 @@
   height: 200px;
   border: 2px dashed var(--border-color);
   border-radius: var(--radius-md);
-  color: var(--secondary-color);
+  color: var(--text-muted);
   gap: 1rem;
 }
 

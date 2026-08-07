@@ -1,55 +1,41 @@
 import pytest
-import asyncio
+from unittest.mock import AsyncMock, patch
 from app.core.events import EventPublisher, DomainEvent
+from app.modules.payments.events import PaymentCompletedEvent
 
 class DummyEvent(DomainEvent):
     user_id: int
     action: str
 
 @pytest.mark.asyncio
-async def test_event_bus_pub_sub():
+async def test_event_bus_unmapped_event():
     bus = EventPublisher()
     
-    # Store received events here
-    received_events = []
-    
-    async def dummy_handler(event: DummyEvent):
-        received_events.append(event)
+    with patch("app.core.events.create_pool", new_callable=AsyncMock) as mock_create_pool:
+        mock_pool = AsyncMock()
+        mock_create_pool.return_value = mock_pool
         
-    # Subscribe handler
-    bus.subscribe(DummyEvent, dummy_handler)
-    
-    # Publish event
-    test_event = DummyEvent(user_id=1, action="test_action")
-    await bus.publish(test_event)
-    
-    # Wait for fire-and-forget tasks to complete
-    await asyncio.sleep(0.1)
-    
-    # Assert event was received
-    assert len(received_events) == 1
-    assert received_events[0].user_id == 1
-    assert received_events[0].action == "test_action"
+        test_event = DummyEvent(user_id=1, action="test_action")
+        mock_db = AsyncMock()
+        await bus.publish(mock_db, test_event)
+        
+        # Should not enqueue anything since it's unmapped
+        mock_pool.enqueue_job.assert_not_called()
 
 @pytest.mark.asyncio
-async def test_event_bus_multiple_handlers():
+async def test_event_bus_payment_completed():
     bus = EventPublisher()
     
-    counter = {"count": 0}
-    
-    async def handler1(event: DummyEvent):
-        counter["count"] += 1
+    with patch("app.core.events.create_pool", new_callable=AsyncMock) as mock_create_pool:
+        mock_pool = AsyncMock()
+        mock_create_pool.return_value = mock_pool
         
-    async def handler2(event: DummyEvent):
-        counter["count"] += 1
+        test_event = PaymentCompletedEvent(order_id=1, user_id=2, session_id=None)
+        mock_db = AsyncMock()
+        await bus.publish(mock_db, test_event)
         
-    bus.subscribe(DummyEvent, handler1)
-    bus.subscribe(DummyEvent, handler2)
-    
-    await bus.publish(DummyEvent(user_id=2, action="multi"))
-    
-    # Wait for fire-and-forget tasks to complete
-    await asyncio.sleep(0.1)
-    
-    # Both handlers should be executed
-    assert counter["count"] == 2
+        # Should add an OutboxEvent to db
+        assert mock_db.add.call_count == 1
+        outbox_event = mock_db.add.call_args[0][0]
+        assert outbox_event.event_type == "PaymentCompletedEvent"
+        assert outbox_event.status == "PENDING"

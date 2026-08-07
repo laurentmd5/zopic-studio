@@ -13,28 +13,28 @@ test.describe('Athlete Flow', () => {
     });
 
     // 1. Visit Edit Identity
-    await page.goto('/identity/edit');
-    await expect(page.locator('text="Mon Profil"')).toBeVisible();
+    await page.goto('/profile/edit');
+    await expect(page.locator('text="Modifier mon identité"')).toBeVisible();
 
     // 2. Edit fields
-    await page.fill('input[name="club"]', 'FC Playwright');
-    await page.fill('input[name="nationality"]', 'Dakar, Sénégal');
-    await page.fill('textarea[name="bio"]', 'Automation testing is great');
+    await page.fill('input[placeholder="ex: ASC Jaraaf"]', 'FC Playwright');
+    await page.fill('input[placeholder="ex: Dakar, Sénégal"]', 'Dakar, Sénégal');
+    await page.fill('textarea[placeholder="Racontez votre parcours..."]', 'Automation testing is great');
     
     // Save
     await page.click('text="Enregistrer"', { force: true });
     
     // It should navigate to /@slug
     // Assuming mock slug is returned. For now we just verify the URL changes or a toast appears.
-    // We can't guarantee what the slug is, so we just wait for URL to not be /identity/edit
-    await page.waitForURL(url => !url.href.includes('/identity/edit'));
+    // We can't guarantee what the slug is, so we just wait for URL to not be /profile/edit
+    await page.waitForURL(url => !url.href.includes('/profile/edit'));
 
     // 3. Visit Timeline
     await page.goto('/timeline');
-    await expect(page.locator('text="Ma Carrière"')).toBeVisible();
-    // Wait for the timeline to load and show either empty state or some years
-    // The text 'Votre carrière sportive' or 'Aucune compétition' should be visible
-    const hasTimeline = await page.locator('text="Votre carrière sportive"').isVisible();
+    await expect(page.locator('text="Ma Timeline"')).toBeVisible();
+    
+    // Wait for the timeline to load
+    const hasTimeline = await page.locator('text="2025"').isVisible();
     const hasEmpty = await page.locator('text="Aucune compétition"').isVisible();
     expect(hasTimeline || hasEmpty).toBeTruthy();
   });

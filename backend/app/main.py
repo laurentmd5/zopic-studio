@@ -11,18 +11,33 @@ from app.core.config import settings
 from app.core.database import get_db
 from app.modules.athletes.models import AthleteProfile, PrivacyLevel
 
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from app.core.limiter import limiter
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
 )
 
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 # Setup Jinja2 templates
 templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "templates"))
 
+# Configure CORS
+origins = []
 # Set all CORS enabled origins
+if settings.BACKEND_CORS_ORIGINS:
+    origins = [str(origin).strip("/") for origin in settings.BACKEND_CORS_ORIGINS]
+else:
+    # Fallback to local dev origins if not set
+    origins = ["http://localhost:5173", "http://localhost:5174", "http://localhost:3000"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -49,17 +64,23 @@ from app.modules.archives.router import router as archives_router
 from app.modules.athletes.router import router as athletes_router
 from app.modules.public.router import router as public_router
 
-app.include_router(auth_router)
-app.include_router(events_router)
-app.include_router(storage_router)
-app.include_router(face_recognition_router)
-app.include_router(payments_router)
-app.include_router(subscriptions_router)
-app.include_router(favorites_router)
-app.include_router(downloads_router)
-app.include_router(archives_router)
-app.include_router(athletes_router, prefix="/api/v1/athletes")
-app.include_router(public_router, prefix="/api/v1/public")
+from fastapi import APIRouter
+
+api_router = APIRouter()
+
+api_router.include_router(auth_router)
+api_router.include_router(events_router)
+api_router.include_router(storage_router)
+api_router.include_router(face_recognition_router)
+api_router.include_router(payments_router)
+api_router.include_router(subscriptions_router)
+api_router.include_router(favorites_router)
+api_router.include_router(downloads_router)
+api_router.include_router(archives_router)
+api_router.include_router(athletes_router, prefix="/athletes")
+api_router.include_router(public_router, prefix="/public")
+
+app.include_router(api_router, prefix=settings.API_V1_STR)
 
 # SSR Route for Public Profiles
 @app.get("/@{slug}", response_class=HTMLResponse, tags=["SSR"])

@@ -1,10 +1,15 @@
-from sqlalchemy import JSON
+from sqlalchemy import JSON, UniqueConstraint
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Enum as SQLEnum
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 import enum
 from app.core.database import Base
 from app.modules.auth.models import User # Ensure User is in registry
+
+class CompetitionStatus(str, enum.Enum):
+    DRAFT = "DRAFT"
+    PUBLISHED = "PUBLISHED"
+    ARCHIVED = "ARCHIVED"
 
 class PhotoStatus(str, enum.Enum):
     PENDING = "PENDING"
@@ -24,8 +29,10 @@ class Competition(Base):
     is_public = Column(Boolean, default=True)
     access_code = Column(String, nullable=True)
     
+    status = Column(SQLEnum(CompetitionStatus), default=CompetitionStatus.DRAFT, nullable=False)
+    
     # Flexible settings (JSON) to store location, sport, categories, price, etc.
-    settings = Column(JSON, nullable=True, default={})
+    settings = Column(JSON, nullable=True, default=dict)
     
     # Packs configuration
     packs_enabled = Column(Boolean, default=False)
@@ -69,6 +76,10 @@ class Photo(Base):
 
 class Favorite(Base):
     __tablename__ = "favorites"
+    __table_args__ = (
+        UniqueConstraint("user_id", "photo_id", name="uq_favorite_user_photo"),
+        UniqueConstraint("session_id", "photo_id", name="uq_favorite_session_photo"),
+    )
 
     id = Column(Integer, primary_key=True, index=True)
     session_id = Column(String, index=True, nullable=True) # For guest users (UUID)

@@ -109,12 +109,12 @@ async def test_get_timeline_authenticated(async_client):
     app.dependency_overrides[get_current_user_optional] = lambda: user
     
     with patch("app.modules.athletes.router.get_athlete_timeline", new_callable=AsyncMock) as mock_timeline:
-        mock_timeline.return_value = {"message": "Votre carriÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¨re sportive en images ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â°ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ", "timeline": [], "total_competitions": 0, "total_photos": 0}
+        mock_timeline.return_value = {"message": "Votre carrière sportive en images 📸", "timeline": [], "total_competitions": 0, "total_photos": 0}
         
         response = await async_client.get("/api/v1/athletes/me/timeline")
         
         assert response.status_code == 200
-        assert response.json()["message"] == "Votre carriÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¨re sportive en images ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â°ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â "
+        assert response.json()["message"] == "Votre carrière sportive en images 📸"
         mock_timeline.assert_awaited_once_with(db=unittest.mock.ANY, user_id="user_123", session_id=None)
         
     app.dependency_overrides.clear()
@@ -126,7 +126,7 @@ async def test_get_timeline_guest(async_client):
     app.dependency_overrides[get_current_user_optional] = lambda: None
     
     with patch("app.modules.athletes.router.get_athlete_timeline", new_callable=AsyncMock) as mock_timeline:
-        mock_timeline.return_value = {"message": "Le dÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©but d'une grande aventure ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â°ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬", "timeline": [], "total_competitions": 0, "total_photos": 0}
+        mock_timeline.return_value = {"message": "Le début d'une grande aventure 🚀", "timeline": [], "total_competitions": 0, "total_photos": 0}
         
         response = await async_client.get("/api/v1/athletes/me/timeline", headers={"X-Session-ID": "session_123"})
         

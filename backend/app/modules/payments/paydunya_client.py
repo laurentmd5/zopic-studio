@@ -3,13 +3,13 @@ from typing import Dict, Any
 
 class PayDunyaClient:
     """
-    Client PayDunya. En dÃ©veloppement, on simule l'API PayDunya.
+    Client PayDunya. En développement, on simule l'API PayDunya.
     En production, cela utiliserait httpx pour appeler l'API de PayDunya.
     """
     
     async def create_invoice(self, amount: int, order_id: int, cancel_url: str, return_url: str) -> Dict[str, Any]:
         """
-        Simule la crÃ©ation d'une facture sur PayDunya.
+        Simule la création d'une facture sur PayDunya.
         Renvoie un token et une URL de paiement.
         """
         # Generation d'un token fictif unique

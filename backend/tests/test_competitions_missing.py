@@ -12,7 +12,7 @@ async def test_read_event_private_wrong_code(async_client, db_session):
     db_session.add(comp)
     await db_session.commit()
     
-    response = await async_client.get(f"/competitions/{comp.id}?access_code=WRONG")
+    response = await async_client.get(f"/api/v1/competitions/{comp.id}?access_code=WRONG")
     assert response.status_code == 403
 
 @pytest.mark.asyncio
@@ -29,7 +29,7 @@ async def test_update_packs_not_authorized(async_client, db_session):
     
     app.dependency_overrides[get_current_user] = lambda: user2
     
-    response = await async_client.put(f"/competitions/{comp.id}/packs", json={
+    response = await async_client.put(f"/api/v1/competitions/{comp.id}/packs", json={
         "packs_enabled": True, "packs": []
     })
     assert response.status_code == 403
@@ -47,7 +47,7 @@ async def test_update_packs_success(async_client, db_session):
     
     app.dependency_overrides[get_current_user] = lambda: user
     
-    response = await async_client.put(f"/competitions/{comp.id}/packs", json={
+    response = await async_client.put(f"/api/v1/competitions/{comp.id}/packs", json={
         "packs_enabled": True, 
         "packs": [{"label": "Pack1", "price_xof": 1000, "quantity": 5}]
     })
@@ -61,6 +61,6 @@ async def test_get_packs_success(async_client, db_session):
     db_session.add(comp)
     await db_session.commit()
     
-    response = await async_client.get(f"/competitions/{comp.id}/packs")
+    response = await async_client.get(f"/api/v1/competitions/{comp.id}/packs")
     assert response.status_code == 200
     assert response.json()["packs_enabled"] is True

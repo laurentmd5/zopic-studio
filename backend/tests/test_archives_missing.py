@@ -9,7 +9,7 @@ from datetime import datetime, timezone, timedelta
 
 @pytest.mark.asyncio
 async def test_create_archive_order_not_found(async_client, db_session):
-    response = await async_client.post("/orders/999/archives")
+    response = await async_client.post("/api/v1/orders/999/archives")
     assert response.status_code == 404
 
 @pytest.mark.asyncio
@@ -18,7 +18,7 @@ async def test_create_archive_no_permission(async_client, db_session):
     db_session.add(order)
     await db_session.commit()
     
-    response = await async_client.post(f"/orders/{order.id}/archives")
+    response = await async_client.post(f"/api/v1/orders/{order.id}/archives")
     assert response.status_code == 403
 
 @pytest.mark.asyncio
@@ -45,7 +45,7 @@ async def test_create_archive_success(async_client, db_session):
             
     with patch("app.modules.archives.router.get_redis_pool", new_callable=AsyncMock) as mock_pool:
         mock_pool.return_value = MockRedis()
-        response = await async_client.post(f"/orders/{order.id}/archives")
+        response = await async_client.post(f"/api/v1/orders/{order.id}/archives")
         assert response.status_code == 200
         assert "archive_id" in response.json()
 
@@ -59,8 +59,9 @@ async def test_archive_callback(async_client, db_session):
     db_session.add(archive)
     await db_session.commit()
     
+    from app.core.config import settings
     response = await async_client.post(
-        f"/orders/{order.id}/archives/{archive.id}/callback",
+        f"/api/v1/orders/1/archives/1/callback?secret={settings.SECRET_KEY}",
         json={"status": "COMPLETED", "s3_object_key": "zips/test.zip", "size": 1024}
     )
     assert response.status_code == 200

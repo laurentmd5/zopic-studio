@@ -1,32 +1,20 @@
-# React + TypeScript + Vite
+# ZoPic Studio - App Athlètes (PWA)
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Cette application mobile-first (PWA) construite avec React/Vite est conçue pour les **athlètes**.
+Elle permet de :
+- Trouver des photos de soi via un simple selfie (IA Biométrique).
+- Acheter ses photos (Paiement local).
+- Personnaliser son Profil Public "Identité Sportive" et sa Galerie.
 
-Currently, two official plugins are available:
+## Démarrage Rapide
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Particularités
+- **Bottom Navigation** : Interface optimisée pour mobile (Accueil, Recherche, Achats, Profil).
+- **Profil Public & SSR** : Le partage du profil athlète (`/@pseudo`) repose sur un backend SSR léger (intégré au main.py FastAPI) qui pré-génère les balises Open Graph pour le SEO, puis hydrate cette application React.
+
+Pour plus d'informations sur l'architecture globale, voir le dossier `/docs` à la racine.

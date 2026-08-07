@@ -12,11 +12,15 @@ QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
 async def health_check():
     return {"status": "ok", "service": "worker-ai"}
 
+from fastapi import Form
 @app.post("/search")
-async def search_faces(file: UploadFile = File(...)):
+async def search_faces(
+    competition_id: int = Form(...),
+    file: UploadFile = File(...)
+):
     """
-    ReÃ§oit un selfie, extrait l'embedding du visage principal,
-    et recherche les photos similaires dans Qdrant.
+    Reçoit un selfie, extrait l'embedding du visage principal,
+    et recherche les photos similaires dans Qdrant pour la compétition donnée.
     """
     try:
         content = await file.read()
@@ -25,16 +29,22 @@ async def search_faces(file: UploadFile = File(...)):
         if not embeddings:
             raise HTTPException(status_code=400, detail="Aucun visage detecte sur le selfie.")
             
-        # On prend le premier visage (le plus proÃ©minent)
+        # On prend le premier visage (le plus proéminent)
         main_face_embedding = embeddings[0]
         
         # Recherche dans Qdrant
         qdrant = AsyncQdrantClient(url=QDRANT_URL)
+        collection_name = f"faces_v1_{competition_id}"
+        
+        # Verify collection exists
+        if not await qdrant.collection_exists(collection_name):
+            return {"results": []}
+            
         search_result = await qdrant.search(
-            collection_name="faces",
+            collection_name=collection_name,
             query_vector=main_face_embedding,
             limit=20, # On renvoie les 20 meilleures correspondances
-            score_threshold=0.6 # Seuil de similaritÃ© (Cosine)
+            score_threshold=0.85 # Seuil de similarité (Cosine)
         )
         
         # Format the response
@@ -49,5 +59,47 @@ async def search_faces(file: UploadFile = File(...)):
             })
             
         return {"results": results}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/forget")
+async def forget_faces(
+    competition_id: int = Form(...),
+    file: UploadFile = File(...)
+):
+    """
+    Extrait l'embedding du selfie et supprime les points correspondants
+    dans Qdrant pour la compétition donnée.
+    """
+    try:
+        content = await file.read()
+        embeddings = face_analyzer.extract_faces(content)
+        
+        if not embeddings:
+            raise HTTPException(status_code=400, detail="Aucun visage detecte sur le selfie.")
+            
+        main_face_embedding = embeddings[0]
+        qdrant = AsyncQdrantClient(url=QDRANT_URL)
+        collection_name = f"faces_v1_{competition_id}"
+        
+        if not await qdrant.collection_exists(collection_name):
+            return {"deleted_faces": 0}
+            
+        search_result = await qdrant.search(
+            collection_name=collection_name,
+            query_vector=main_face_embedding,
+            limit=1000,
+            score_threshold=0.85
+        )
+        
+        point_ids = [hit.id for hit in search_result]
+        if point_ids:
+            from qdrant_client.http import models as qmodels
+            await qdrant.delete(
+                collection_name=collection_name,
+                points_selector=qmodels.PointIdsList(points=point_ids)
+            )
+            
+        return {"deleted_faces": len(point_ids)}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

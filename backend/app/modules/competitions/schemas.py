@@ -8,7 +8,7 @@ class PhotoBase(BaseModel):
     s3_object_key: str
 
 class PhotoCreate(PhotoBase):
-    pass
+    file_size_bytes: Optional[int] = None
 
 class PhotoResponse(PhotoBase):
     id: int

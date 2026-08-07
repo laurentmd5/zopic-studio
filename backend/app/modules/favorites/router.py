@@ -9,7 +9,7 @@ from app.modules.competitions.models import Favorite, Photo
 from app.modules.auth.service import get_current_user_optional
 from app.modules.auth.models import User
 
-router = APIRouter(prefix="/api/v1/favorites", tags=["Favorites"])
+router = APIRouter(prefix="/favorites", tags=["Favorites"])
 
 class FavoriteResponse(BaseModel):
     id: int

@@ -86,6 +86,6 @@ async def test_process_webhook_emits_event(db_session):
         
         # Check event emitted
         assert mock_publish.call_count == 1
-        event = mock_publish.call_args[0][0]
+        event = mock_publish.call_args[0][1]
         assert event.order_id == order.id
         assert event.session_id == "sess_456"

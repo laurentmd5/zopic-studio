@@ -21,7 +21,7 @@ async def get_my_subscription(current_user: User = Depends(get_current_user), db
 
 @router.post("/subscribe", response_model=schemas.SubscriptionResponse)
 async def subscribe(data: schemas.SubscriptionCreate, current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
-    # TODO: IntÃ©gration PayDunya pour les abonnements rÃ©currents
+    # TODO: Intégration PayDunya pour les abonnements récurrents
     return await service.create_subscription(db, current_user.id, data.plan_id)
 
 @router.get("/storage", response_model=schemas.StorageUsageResponse)

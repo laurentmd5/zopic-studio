@@ -69,7 +69,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: var(--secondary-color);
+  color: var(--text-muted);
 }
 
 .statValue {
@@ -102,7 +102,7 @@
 .table th {
   text-align: left;
   padding: 1rem;
-  color: var(--secondary-color);
+  color: var(--text-muted);
   font-weight: 500;
   border-bottom: 1px solid var(--border-color);
 }
@@ -145,11 +145,11 @@
 
 .txSubtitle {
   font-size: 0.85rem;
-  color: var(--secondary-color);
+  color: var(--text-muted);
 }
 
 .txDate {
-  color: var(--secondary-color);
+  color: var(--text-muted);
 }
 
 .txAmount {

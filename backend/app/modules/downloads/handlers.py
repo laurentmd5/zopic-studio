@@ -44,5 +44,4 @@ async def handle_payment_completed(event: PaymentCompletedEvent):
             await db.rollback()
             logger.error(f"Failed to process PaymentCompletedEvent for Order {event.order_id}: {e}")
 
-# Register handler
-event_bus.subscribe(PaymentCompletedEvent, handle_payment_completed)
+# ARQ will call this directly in worker.py

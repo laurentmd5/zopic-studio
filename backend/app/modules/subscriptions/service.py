@@ -13,7 +13,7 @@ async def get_user_subscription(db: AsyncSession, user_id: int):
     return result.scalars().first()
 
 async def create_subscription(db: AsyncSession, user_id: int, plan_id: int) -> Subscription:
-    # On dÃ©sactive l'ancien abonnement si prÃ©sent
+    # On désactive l'ancien abonnement si présent
     existing = await get_user_subscription(db, user_id)
     if existing:
         existing.is_active = False

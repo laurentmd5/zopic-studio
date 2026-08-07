@@ -20,7 +20,7 @@ async def test_create_order_endpoint(async_client, db_session):
         mock_create.return_value = {"order_id": 1, "paydunya_token": "tok_123", "total_amount": 2000, "payment_url": "http://pay"}
         
         with patch("app.modules.auth.service.get_current_user_optional", return_value=user):
-            response = await async_client.post("/payments/orders", json=payload)
+            response = await async_client.post("/api/v1/payments/orders", json=payload)
             assert response.status_code == 200
             assert response.json()["paydunya_token"] == "tok_123"
 
@@ -28,7 +28,7 @@ async def test_create_order_endpoint(async_client, db_session):
 async def test_simulate_webhook(async_client):
     with patch("app.modules.payments.service.process_webhook", new_callable=AsyncMock) as mock_process:
         mock_process.return_value = {"status": "paid"}
-        response = await async_client.post("/payments/simulate-webhook?token=tok_123&status=completed")
+        response = await async_client.post("/api/v1/payments/simulate-webhook?token=tok_123&status=completed")
         assert response.status_code == 200
         assert response.json()["status"] == "paid"
 
@@ -38,7 +38,7 @@ async def test_get_purchases(async_client, db_session):
     db_session.add(order)
     await db_session.commit()
     
-    response = await async_client.get("/payments/purchases", headers={"x-session-id": "guest_1"})
+    response = await async_client.get("/api/v1/payments/purchases", headers={"x-session-id": "guest_1"})
     assert response.status_code == 200
     data = response.json()
     assert len(data) == 1

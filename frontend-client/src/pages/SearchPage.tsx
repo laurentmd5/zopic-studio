@@ -7,7 +7,7 @@ import './SearchPage.css'
 
 export default function SearchPage() {
   const navigate = useNavigate()
-  useParams()
+  const { id } = useParams()
   const { state, results, setSearchState, setResults } = useSearchStore()
   const { addItem, removeItem, items, total } = useCartStore()
 
@@ -46,21 +46,85 @@ export default function SearchPage() {
     }
   }
 
-  const simulateSearch = () => {
-    stopCamera()
-    setSearchState('loading')
-    setTimeout(() => {
-      setSearchState('success')
-      setResults([
-        { id: 1, url: 'https://images.unsplash.com/photo-1552674605-15c2145b9ce2?w=400&q=80', price: 500 },
-        { id: 2, url: 'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?w=400&q=80', price: 500 },
-        { id: 3, url: 'https://images.unsplash.com/photo-1571008887538-b36bb32f4571?w=400&q=80', price: 500 },
-        { id: 4, url: 'https://images.unsplash.com/photo-1530549387789-4c1017266635?w=400&q=80', price: 500 },
-        { id: 5, url: 'https://images.unsplash.com/photo-1518659739433-2804b3ab56cd?w=400&q=80', price: 500 },
-        { id: 6, url: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=400&q=80', price: 500 }
-      ])
-    }, 2500)
+  const handleCapture = async () => {
+    if (!consent) return;
+    const compId = id || '1';
+    let fileToUpload: Blob | null = null;
+    
+    if (videoRef.current && stream) {
+       const canvas = document.createElement('canvas');
+       canvas.width = videoRef.current.videoWidth;
+       canvas.height = videoRef.current.videoHeight;
+       const ctx = canvas.getContext('2d');
+       if (ctx) {
+         ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+         fileToUpload = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.9));
+       }
+    }
+
+    if (!fileToUpload) {
+       alert("Erreur de capture de l'image");
+       return;
+    }
+    
+    await performSearch(fileToUpload, compId);
   }
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!consent) return;
+    const file = e.target.files?.[0];
+    if (file) {
+      const compId = id || '1';
+      performSearch(file, compId);
+    }
+  }
+
+  const performSearch = async (file: Blob | File, compId: string) => {
+    stopCamera();
+    setSearchState('loading');
+    try {
+      const formData = new FormData();
+      formData.append('file', file, 'selfie.jpg');
+      formData.append('competition_id', compId);
+      formData.append('consent', consent ? 'true' : 'false');
+
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+      const token = localStorage.getItem('token');
+      const headers: Record<string, string> = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const response = await fetch(`${API_URL}/faces/search`, {
+        method: 'POST',
+        headers,
+        body: formData,
+      });
+
+      if (!response.ok) {
+        if (response.status === 403) {
+            throw new Error("Le consentement biométrique est obligatoire.");
+        }
+        throw new Error("Erreur IA ou serveur (Code: " + response.status + ")");
+      }
+
+      const data = await response.json();
+      
+      const searchResults = (data.results || []).map((r: any) => ({
+         id: r.photo_id || Math.random(),
+         url: r.url || 'https://images.unsplash.com/photo-1552674605-15c2145b9ce2?w=400&q=80',
+         price: r.price_xof || 500,
+      }));
+
+      setResults(searchResults);
+      setSearchState('success');
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || "Erreur lors de la recherche");
+      setSearchState('idle');
+      startCamera();
+    }
+  }
+
+  const [consent, setConsent] = useState(false)
 
   // Écran 2 - Recherche par Selfie
   if (state === 'idle') {
@@ -89,19 +153,39 @@ export default function SearchPage() {
                 <video ref={videoRef} autoPlay playsInline muted className="camera-video" />
               )}
             </div>
+
+            <div className="consent-container" style={{ margin: '16px', textAlign: 'left', fontSize: '0.85rem' }}>
+              <label style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', cursor: 'pointer' }}>
+                <input 
+                  type="checkbox" 
+                  checked={consent}
+                  onChange={(e) => setConsent(e.target.checked)}
+                  style={{ marginTop: '4px' }}
+                />
+                <span style={{ color: 'var(--text-secondary)' }}>
+                  J'accepte que mon visage soit analysé temporairement pour retrouver mes photos. Aucune image de mon visage n'est conservée. <a href="/privacy" style={{ color: 'var(--primary-color)', textDecoration: 'underline' }}>Politique de confidentialité</a>
+                </span>
+              </label>
+            </div>
+
             {!cameraError && (
-              <button onClick={simulateSearch} className="capture-btn">
+              <button 
+                onClick={handleCapture} 
+                className="capture-btn"
+                disabled={!consent}
+                style={{ opacity: consent ? 1 : 0.5, cursor: consent ? 'pointer' : 'not-allowed' }}
+              >
                 <Camera size={24} />
               </button>
             )}
           </div>
 
-          <label className="import-section">
+          <label className="import-section" style={{ opacity: consent ? 1 : 0.5, cursor: consent ? 'pointer' : 'not-allowed' }}>
             <span className="import-text">ou importez une photo</span>
             <div className="import-icon-wrapper">
               <Upload size={20} />
             </div>
-            <input type="file" accept="image/*" style={{ display: 'none' }} onChange={simulateSearch} />
+            <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileUpload} disabled={!consent} />
           </label>
         </section>
       </div>

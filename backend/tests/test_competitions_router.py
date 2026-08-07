@@ -31,7 +31,7 @@ async def test_create_competition(async_client, db_session):
         from app.modules.auth.service import get_current_user
         app.dependency_overrides[get_current_user] = lambda: user
         
-        response = await async_client.post("/competitions/", json=payload)
+        response = await async_client.post("/api/v1/competitions/", json=payload)
         
         assert response.status_code == 200
         assert response.json()["name"] == "Super Event"
@@ -52,7 +52,7 @@ async def test_get_competition(async_client):
     )
     with patch("app.modules.competitions.service.get_competition", new_callable=AsyncMock) as mock_srv:
         mock_srv.return_value = mock_resp
-        response = await async_client.get("/competitions/1")
+        response = await async_client.get("/api/v1/competitions/1")
         assert response.status_code == 200
         assert response.json()["name"] == "Existing Event"
 
@@ -71,7 +71,7 @@ async def test_list_competitions(async_client):
     )]
     with patch("app.modules.competitions.service.get_competitions", new_callable=AsyncMock) as mock_srv:
         mock_srv.return_value = mock_resp
-        response = await async_client.get("/competitions/")
+        response = await async_client.get("/api/v1/competitions/")
         assert response.status_code == 200
         assert len(response.json()) >= 1
 
@@ -102,7 +102,7 @@ async def test_create_epreuve(async_client, db_session):
         from app.modules.auth.service import get_current_user
         app.dependency_overrides[get_current_user] = lambda: user
         
-        response = await async_client.post(f"/competitions/{comp.id}/epreuves", json=payload)
+        response = await async_client.post(f"/api/v1/competitions/{comp.id}/epreuves", json=payload)
         
         assert response.status_code == 200
         assert response.json()["name"] == "Course A"

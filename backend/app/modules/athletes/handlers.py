@@ -82,5 +82,4 @@ async def update_athlete_statistics(event: PaymentCompletedEvent):
             await db.rollback()
             logger.error(f"Failed to update AthleteStatistics for Order {event.order_id}: {e}")
 
-# Register handler
-event_bus.subscribe(PaymentCompletedEvent, update_athlete_statistics)
+# ARQ will call this directly in worker.py

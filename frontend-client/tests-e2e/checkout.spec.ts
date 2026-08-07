@@ -3,8 +3,8 @@ import { test, expect } from '@playwright/test';
 test.describe('Checkout Flow', () => {
   test('User can search and complete checkout', async ({ page }) => {
     // Mock search API
-    await page.route('**/api/v1/public/athletes/search*', async route => {
-      await route.fulfill({ json: [{ id: 1, name: 'Event', date: '2023' }] });
+    await page.route('**/api/v1/faces/search*', async route => {
+      await route.fulfill({ json: { results: [{ photo_id: 1, url: 'mock.jpg', price_xof: 500 }] } });
     });
 
     // 1. Visit Home
@@ -15,36 +15,37 @@ test.describe('Checkout Flow', () => {
     await page.click('text="Trouver mes photos"', { force: true });
     await expect(page).toHaveURL(/.*\/search/);
 
-    // 3. Search by Dossard
-    await page.fill('input[placeholder="Numéro de dossard"]', '12345');
-    await page.click('button:has-text("Rechercher")');
+    // 3. Search by File Upload (since selfie search is the main flow)
+    await page.check('input[type="checkbox"]');
+    await page.setInputFiles('input[type="file"]', {
+      name: 'selfie.jpg',
+      mimeType: 'image/jpeg',
+      buffer: Buffer.from('mock-image-data')
+    });
 
-    // 4. In a real app we'd wait for results. Here we assume we navigate to /competition/1
-    // Actually the mock in SearchPage navigates to /competition/1 after search
-    await page.waitForURL(/.*\/competition\/1/);
+    // 4. Wait for search to complete and results to be displayed
+    await page.waitForSelector('text="Résultats"');
     
     // 5. Select a photo and add to cart
-    // Wait for photos to appear (mock data might take a bit or appear instantly)
-    // We can just click the first "Ajouter au panier" button
-    await page.waitForSelector('text="Ajouter au panier"');
-    await page.click('text="Ajouter au panier"', { matchFallback: true });
+    await page.waitForSelector('.photo-item');
+    await page.click('.photo-item'); // clicks the first photo item
 
     // 6. Go to checkout (Clicking on Panier in BottomNav or the CTA)
     await page.click('text="Voir le panier"', { force: true });
     await expect(page).toHaveURL(/.*\/checkout/);
 
     // 7. Verify Checkout Page
-    await expect(page.locator('text="Votre Panier"')).toBeVisible();
-    await page.click('text="Passer à la caisse"');
+    await expect(page.locator('text="Panier"')).toBeVisible();
+    await page.click('text="Procéder au paiement"');
 
     // 8. Select Payment Method
     await expect(page).toHaveURL(/.*\/payment/);
     // Click on Wave (for example)
     await page.click('text="Wave"', { force: true });
-    await page.click('text="Payer"', { force: true });
+    await page.click('button:has-text("Payer")', { force: true });
 
     // 9. Should redirect to Purchases
     await page.waitForURL(/.*\/purchases/);
-    await expect(page.locator('text="Mes Achats"')).toBeVisible();
+    await expect(page.locator('text="Mes achats"')).toBeVisible();
   });
 });

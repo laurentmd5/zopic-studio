@@ -74,7 +74,7 @@ async def get_my_profile(
     result = await db.execute(select(AthleteProfile).filter(AthleteProfile.user_id == current_user.id))
     profile = result.scalar_one_or_none()
     if not profile:
-        raise HTTPException(status_code=404, detail="Profil non trouvÃ©")
+        raise HTTPException(status_code=404, detail="Profil non trouvé")
         
     stats_result = await db.execute(select(AthleteStatistics).filter(AthleteStatistics.user_id == current_user.id))
     stats = stats_result.scalar_one_or_none()

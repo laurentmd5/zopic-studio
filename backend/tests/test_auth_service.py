@@ -51,8 +51,51 @@ async def test_verify_otp_and_login_success(db_session):
 
 @pytest.mark.asyncio
 async def test_verify_otp_and_login_failure(db_session):
+    # Setup OTP
+    otp_code = OTPCode(
+        phone_number="+221770000004", 
+        code="123456", 
+        expires_at=datetime.now(timezone.utc) + timedelta(minutes=10)
+    )
+    db_session.add(otp_code)
+    await db_session.commit()
+    
     result = await verify_otp_and_login(db_session, "+221770000004", "000000")
     assert result is None
+    
+    await db_session.refresh(otp_code)
+    assert otp_code.failed_attempts == 1
+    assert otp_code.is_locked is False
+
+@pytest.mark.asyncio
+async def test_verify_otp_lockout(db_session):
+    # Setup OTP
+    otp_code = OTPCode(
+        phone_number="+221770000010", 
+        code="123456", 
+        expires_at=datetime.now(timezone.utc) + timedelta(minutes=10),
+        failed_attempts=4
+    )
+    db_session.add(otp_code)
+    await db_session.commit()
+    
+    # 5th failed attempt should lock it
+    with pytest.raises(HTTPException) as excinfo:
+        await verify_otp_and_login(db_session, "+221770000010", "000000")
+        
+    assert excinfo.value.status_code == 400
+    assert "Trop de tentatives" in excinfo.value.detail
+    
+    await db_session.refresh(otp_code)
+    assert otp_code.failed_attempts == 5
+    assert otp_code.is_locked is True
+    
+    # After lockout, even correct code should fail
+    with pytest.raises(HTTPException) as excinfo2:
+        await verify_otp_and_login(db_session, "+221770000010", "123456")
+    
+    assert excinfo2.value.status_code == 400
+    assert "Trop de tentatives" in excinfo2.value.detail
 
 @pytest.mark.asyncio
 async def test_get_current_user_success(db_session):

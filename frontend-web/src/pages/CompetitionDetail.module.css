@@ -46,7 +46,7 @@
   align-items: center;
   gap: 12px;
   font-size: 0.9rem;
-  color: var(--secondary-color);
+  color: var(--text-muted);
 }
 
 .badge {
@@ -85,7 +85,7 @@
 }
 
 .secondaryBtn:hover {
-  border-color: var(--secondary-color);
+  border-color: var(--text-muted);
 }
 
 .primaryBtn {
@@ -127,7 +127,7 @@
 .iconBtn {
   background: none;
   border: none;
-  color: var(--secondary-color);
+  color: var(--text-muted);
   cursor: pointer;
   padding: 4px;
   border-radius: var(--radius-sm);
@@ -172,7 +172,7 @@
 }
 
 .albumIcon {
-  color: var(--secondary-color);
+  color: var(--text-muted);
 }
 
 .albumItemActive .albumIcon {
@@ -220,7 +220,7 @@
 }
 
 .uploadIcon {
-  color: var(--secondary-color);
+  color: var(--text-muted);
   margin-bottom: 1rem;
 }
 
@@ -251,7 +251,7 @@
 .limits {
   margin-top: 1rem;
   font-size: 0.85rem;
-  color: var(--secondary-color);
+  color: var(--text-muted);
 }
 
 .uploadProgress {
@@ -311,7 +311,7 @@
 .iconBtn {
   background: none;
   border: none;
-  color: var(--secondary-color);
+  color: var(--text-muted);
   cursor: pointer;
   padding: 4px;
   border-radius: var(--radius-sm);
@@ -356,7 +356,7 @@
 }
 
 .albumIcon {
-  color: var(--secondary-color);
+  color: var(--text-muted);
 }
 
 .albumItemActive .albumIcon {
@@ -499,7 +499,7 @@
 }
 
 .photoSize {
-  color: var(--secondary-color);
+  color: var(--text-muted);
   font-size: 0.8rem;
 }
 
@@ -545,7 +545,7 @@
   background: none;
   border: none;
   font-size: 1.5rem;
-  color: var(--secondary-color);
+  color: var(--text-muted);
   cursor: pointer;
 }
 

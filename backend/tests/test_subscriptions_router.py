@@ -9,7 +9,7 @@ async def test_get_plans(async_client, db_session):
     db_session.add(plan)
     await db_session.commit()
     
-    response = await async_client.get("/subscriptions/plans")
+    response = await async_client.get("/api/v1/subscriptions/plans")
     assert response.status_code == 200
     assert len(response.json()) >= 1
     assert response.json()[0]["name"] == "Pro"
@@ -33,7 +33,7 @@ async def test_get_my_subscription(async_client, db_session):
     from app.modules.auth.service import get_current_user
     app.dependency_overrides[get_current_user] = lambda: user
     
-    response = await async_client.get("/subscriptions/me")
+    response = await async_client.get("/api/v1/subscriptions/me")
     assert response.status_code == 200
     assert response.json()["plan_id"] == plan.id
     app.dependency_overrides.clear()
@@ -52,7 +52,7 @@ async def test_subscribe(async_client, db_session):
     from app.modules.auth.service import get_current_user
     app.dependency_overrides[get_current_user] = lambda: user
     
-    response = await async_client.post("/subscriptions/subscribe", json={"plan_id": plan.id})
+    response = await async_client.post("/api/v1/subscriptions/subscribe", json={"plan_id": plan.id})
     assert response.status_code == 200
     assert response.json()["plan_id"] == plan.id
     app.dependency_overrides.clear()
@@ -73,7 +73,7 @@ async def test_get_storage_usage(async_client, db_session):
     
     with patch("app.modules.subscriptions.service.get_storage_usage", new_callable=AsyncMock) as mock_srv:
         mock_srv.return_value = mock_usage
-        response = await async_client.get("/subscriptions/storage")
+        response = await async_client.get("/api/v1/subscriptions/storage")
         assert response.status_code == 200
         assert response.json()["used_bytes"] == 1000
     app.dependency_overrides.clear()

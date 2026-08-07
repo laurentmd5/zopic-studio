@@ -64,7 +64,7 @@ function App() {
             <Route path="/profile/edit" element={<EditIdentityPage />} />
             <Route path="/profile/gallery" element={<GalleryPage />} />
             <Route path="/profile/shares" element={<SharesPage />} />
-            <Route path="/@:handle" element={<PublicIdentityPage />} />
+            <Route path="/:handle" element={<PublicIdentityPage />} />
           </Routes>
         </AppLayout>
       </Router>

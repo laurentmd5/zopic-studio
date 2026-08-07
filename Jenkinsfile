@@ -9,7 +9,7 @@ pipeline {
     
     options {
         timestamps()
-        timeout(time: 45, unit: 'MINUTES')
+        timeout(time: 60, unit: 'MINUTES')
         disableConcurrentBuilds()
         buildDiscarder(logRotator(numToKeepStr: '10'))
     }
@@ -30,71 +30,114 @@ pipeline {
         }
 
         // =====================================================================
-        // STAGE 2 : TESTS UNITAIRES (Backend)
+        // STAGE 2 : LINTING
         // =====================================================================
-        stage('Tests Unitaires - Backend') {
-            steps {
-                dir('backend') {
-                    script {
-                        echo 'Exécution des tests backend avec pytest...'
-                        sh 'curl -LsSf https://astral.sh/uv/install.sh | sh || true'
-                        env.PATH = "${HOME}/.local/bin:${env.PATH}"
-                        sh 'uv sync'
-                        sh 'cp .env.example .env'
-                        sh 'uv run pytest tests/'
+        stage('Linting') {
+            parallel {
+                stage('Lint Backend') {
+                    steps {
+                        dir('backend') {
+                            sh 'curl -LsSf https://astral.sh/uv/install.sh | sh || true'
+                            sh 'export PATH="${HOME}/.local/bin:${PATH}" && uv run ruff check .'
+                        }
+                    }
+                }
+                stage('Lint Frontend Web') {
+                    steps {
+                        dir('frontend-web') {
+                            sh 'docker run --rm -v "${WORKSPACE}/frontend-web:/app" -w /app node:22-alpine sh -c "npm install && npm run lint"'
+                        }
+                    }
+                }
+                stage('Lint Frontend Client') {
+                    steps {
+                        dir('frontend-client') {
+                            sh 'docker run --rm -v "${WORKSPACE}/frontend-client:/app" -w /app node:22-alpine sh -c "npm install && npm run lint"'
+                        }
+                    }
+                }
+                stage('Check Encoding') {
+                    steps {
+                        script {
+                            echo "Vérification des problèmes d'encodage (Mojibake)..."
+                            def grepStatus = sh(
+                                script: 'grep -rE "Ã©|Ã¨|Ã\\xa0|â€™|Ãª|Ã§|Ã®|Ã»|Ã´|Ã¢" backend/app frontend-*/src docs || true',
+                                returnStdout: true
+                            ).trim()
+                            
+                            if (grepStatus) {
+                                error("⚠️ Mojibake détecté dans les fichiers suivants :\n${grepStatus}\nMerci de sauvegarder vos fichiers en UTF-8.")
+                            }
+                        }
                     }
                 }
             }
         }
 
         // =====================================================================
-        // STAGE 3 : TESTS UNITAIRES (Frontend Web)
+        // STAGE 3 : TESTS UNITAIRES
         // =====================================================================
-        stage('Tests Unitaires - Frontend Web (Pro)') {
-            steps {
-                dir('frontend-web') {
-                    script {
-                        echo 'Exécution des tests Frontend Web avec Vitest...'
-                        sh 'docker run --rm -v "${WORKSPACE}/frontend-web:/app" -w /app node:22-alpine sh -c "npm install && npm run test -- --run"'
+        stage('Tests Unitaires') {
+            parallel {
+                stage('Test Backend') {
+                    steps {
+                        dir('backend') {
+                            script {
+                                echo 'Exécution des tests backend avec pytest...'
+                                sh 'export PATH="${HOME}/.local/bin:${PATH}" && uv sync && cp .env.example .env || true && uv run pytest tests/'
+                            }
+                        }
                     }
                 }
-            }
-        }
-
-        // =====================================================================
-        // STAGE 4 : TESTS UNITAIRES (Frontend Client)
-        // =====================================================================
-        stage('Tests Unitaires - Frontend Client (PWA)') {
-            steps {
-                dir('frontend-client') {
-                    script {
-                        echo 'Exécution des tests Frontend Client avec Vitest...'
-                        sh 'docker run --rm -v "${WORKSPACE}/frontend-client:/app" -w /app node:22-alpine sh -c "npm install && npm run test -- --run"'
+                stage('Test Frontend Web') {
+                    steps {
+                        dir('frontend-web') {
+                            echo 'Exécution des tests Frontend Web avec Vitest...'
+                            sh 'docker run --rm -v "${WORKSPACE}/frontend-web:/app" -w /app node:22-alpine sh -c "npm install && npm run test -- --run"'
+                        }
+                    }
+                }
+                stage('Test Frontend Client') {
+                    steps {
+                        dir('frontend-client') {
+                            echo 'Exécution des tests Frontend Client avec Vitest...'
+                            sh 'docker run --rm -v "${WORKSPACE}/frontend-client:/app" -w /app node:22-alpine sh -c "npm install && npm run test -- --run"'
+                        }
                     }
                 }
             }
         }
         
         // =====================================================================
-        // STAGE 5 : BUILD (DOCKER)
+        // STAGE 4 : BUILD (DOCKER)
         // =====================================================================
         stage('Build Docker Images') {
+            parallel {
+                stage('Build Backend & AI') {
+                    steps {
+                        sh "docker build -t zopic-studio-backend:${DOCKER_IMAGE_TAG} -f backend/Dockerfile backend/"
+                        sh "docker build -t zopic-ai-api:${DOCKER_IMAGE_TAG} -f backend/worker_ai/Dockerfile backend/worker_ai/"
+                        sh "docker build -t zopic-ai-worker:${DOCKER_IMAGE_TAG} -f backend/worker_ai/Dockerfile backend/worker_ai/"
+                    }
+                }
+                stage('Build Frontends') {
+                    steps {
+                        sh "docker build -t zopic-frontend-web:${DOCKER_IMAGE_TAG} -f frontend-web/Dockerfile frontend-web/"
+                        sh "docker build -t zopic-frontend-client:${DOCKER_IMAGE_TAG} -f frontend-client/Dockerfile frontend-client/"
+                    }
+                }
+            }
+        }
+
+        // =====================================================================
+        // STAGE 5 : SECURITY SCAN (SAST / Container)
+        // =====================================================================
+        stage('Security Scan') {
             steps {
                 script {
-                    echo "Construction Backend"
-                    sh "docker build -t zopic-studio-backend:${DOCKER_IMAGE_TAG} -f backend/Dockerfile backend/"
-                    
-                    echo "Construction AI API"
-                    sh "docker build -t zopic-ai-api:${DOCKER_IMAGE_TAG} -f backend/worker_ai/Dockerfile backend/worker_ai/"
-
-                    echo "Construction AI Worker"
-                    sh "docker build -t zopic-ai-worker:${DOCKER_IMAGE_TAG} -f backend/worker_ai/Dockerfile backend/worker_ai/"
-                    
-                    echo "Construction Frontend Web (Pro)"
-                    sh "docker build -t zopic-frontend-web:${DOCKER_IMAGE_TAG} -f frontend-web/Dockerfile frontend-web/"
-                    
-                    echo "Construction Frontend Client (PWA)"
-                    sh "docker build -t zopic-frontend-client:${DOCKER_IMAGE_TAG} -f frontend-client/Dockerfile frontend-client/"
+                    echo "Scan de vulnérabilités Trivy sur le backend..."
+                    // Blocking scan on HIGH and CRITICAL vulnerabilities
+                    sh 'trivy image --severity HIGH,CRITICAL --no-progress zopic-studio-backend:${DOCKER_IMAGE_TAG}'
                 }
             }
         }
@@ -102,7 +145,7 @@ pipeline {
         // =====================================================================
         // STAGE 6 : PREPARER LE DEPLOIEMENT
         // =====================================================================
-        stage('Preparer') {
+        stage('Preparer Deploiement') {
             steps {
                 script {
                     sh """
@@ -121,8 +164,8 @@ pipeline {
                     ).trim()
 
                     if (envExists == 'no') {
-                        echo 'ATTENTION : .env manquant - Copie de .env.example'
-                        sh "cp ${WORKSPACE}/backend/.env.example ${DEPLOY_PATH}/backend/.env"
+                        echo 'ATTENTION : .env manquant - Utilisation des secrets Jenkins recommandée. Copie de fallback.'
+                        sh "cp ${WORKSPACE}/backend/.env.example ${DEPLOY_PATH}/backend/.env || true"
                     }
                 }
             }
@@ -131,7 +174,7 @@ pipeline {
         // =====================================================================
         // STAGE 7 : REDEMARRER
         // =====================================================================
-        stage('Redemarrer') {
+        stage('Redemarrer Services') {
             steps {
                 sh """
                     cd ${DEPLOY_PATH}
@@ -160,7 +203,31 @@ pipeline {
         }
 
         // =====================================================================
-        // STAGE 9 : NETTOYER
+        // STAGE 9 : E2E TESTS (Playwright)
+        // =====================================================================
+        stage('E2E Tests') {
+            steps {
+                script {
+                    echo "Lancement des tests de bout en bout (E2E) sur l'environnement cible..."
+                    sh 'docker run --rm --network host mcr.microsoft.com/playwright:v1.44.0-jammy sh -c "echo \\"Running Playwright E2E tests...\\" && npx playwright test"'
+                }
+            }
+        }
+
+        // =====================================================================
+        // STAGE 10 : DAST (Dynamic Application Security Testing)
+        // =====================================================================
+        stage('DAST (ZAP Scan)') {
+            steps {
+                script {
+                    echo "Lancement du scan dynamique OWASP ZAP sur l'API..."
+                    sh 'docker run --rm -t --network host owasp/zap2docker-stable zap-baseline.py -t http://localhost:8000'
+                }
+            }
+        }
+
+        // =====================================================================
+        // STAGE 11 : NETTOYER
         // =====================================================================
         stage('Nettoyer') {
             steps {
@@ -172,7 +239,7 @@ pipeline {
     post {
         success {
             script {
-                def ip = sh(script: "hostname -I | awk '{print \$1}'", returnStdout: true).trim()
+                def ip = sh(script: "hostname -I | awk '{print \$1}' || echo localhost", returnStdout: true).trim()
                 echo """
 ========================================
      DEPLOIEMENT COMPLET REUSSI !

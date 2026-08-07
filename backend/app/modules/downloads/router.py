@@ -5,6 +5,9 @@ from datetime import datetime, timedelta, timezone
 import uuid
 import logging
 
+from app.modules.auth.models import User
+from app.modules.auth.service import get_current_user_optional
+
 from app.core.database import get_db
 from app.modules.payments.models import OrderItem, Order
 from app.modules.competitions.models import Photo
@@ -21,21 +24,31 @@ async def download_photo(
     photo_id: int,
     request: Request,
     x_session_id: str | None = Header(None),
+    current_user: User | None = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db)
 ):
     """
     Génère une Presigned URL courte durée pour télécharger une photo individuelle.
     """
-    print(f"DEBUG: Executing download_photo for order_id={order_id}, photo_id={photo_id}")
+    logger.info("Executing download_photo", extra={"order_id": order_id, "photo_id": photo_id})
     # 1. Vérifier la commande (et l'identité si session_id/user_id)
     order_res = await db.execute(select(Order).where(Order.id == order_id))
     order = order_res.scalars().first()
     if not order:
         raise HTTPException(status_code=404, detail="Commande introuvable.")
     
-    # Simple vérification (en prod, vérifier current_user ou session_id)
-    if order.session_id and x_session_id and order.session_id != x_session_id:
-        raise HTTPException(status_code=403, detail="Accès non autorisé.")
+    # Vérification stricte de propriété
+    if order.user_id:
+        # L'ordre appartient à un utilisateur connecté
+        if not current_user or current_user.id != order.user_id:
+            raise HTTPException(status_code=403, detail="Accès non autorisé : cette commande appartient à un autre utilisateur.")
+    else:
+        # L'ordre appartient à un invité
+        if not x_session_id or order.session_id != x_session_id:
+            raise HTTPException(status_code=403, detail="Accès non autorisé : session invalide.")
+        if current_user:
+            # Un utilisateur connecté ne peut pas télécharger la commande d'un invité (il faut d'abord fusionner)
+            raise HTTPException(status_code=403, detail="Veuillez synchroniser vos achats invités avec votre compte.")
 
     # 2. Vérifier que la photo fait partie de la commande
     item_res = await db.execute(select(OrderItem).where(

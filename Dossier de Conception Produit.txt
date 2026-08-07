@@ -838,15 +838,18 @@ Taux de faux négatifs	< 5%
 PARTIE 8 — CONCEPTION
 20. DESIGN SYSTEM ET MAQUETTES
 20.1 Palette de Couleurs
+Nouvelle Palette Officielle ZoPic Studio
 Couleur	Code Hex	Usage
-Marron principal	#5D4037	Barres, boutons, titres
-Marron clair	#795548	Icônes, bordures
-Beige secondaire	#F5F0E8	Fond d'écran
-Beige foncé	#E8DCC8	Surbrillance, séparateurs
-Blanc	#FFFFFF	Fond cartes, texte sur foncé
-Vert olive	#6B8E23	Badges succès, prix, CTA
-Texte foncé	#3E2723	Texte principal
-Texte clair	#8D6E63	Texte secondaire
+Vert Olive foncé	#3A4B29	Barres de navigation, headers, fonds sombres
+Vert Olive	#6B8E23	Boutons principaux, badges, prix, CTA
+Or	#B8860B	Accents, badges premium, éléments distinctifs
+Fond clair	#F9FAFB	Fond d'écran principal
+Surface claire	#FFFFFF	Cartes, conteneurs
+Surface foncée	#1F2937	Cartes mode sombre
+Texte clair	#1F2937	Texte principal mode clair
+Texte foncé	#F9FAFB	Texte mode sombre
+Gris secondaire	#6B7280	Texte secondaire, labels
+Gris bordure	#D1D5DB	Bordures, séparateurs
 20.2 Typographie
 Titres : Police sans-serif, graisse Bold.
 

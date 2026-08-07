@@ -41,7 +41,8 @@ export const useTimelineStore = create<TimelineState>((set) => ({
   fetchTimeline: async (sessionId = 'guest-123') => {
     set({ isLoading: true, error: null })
     try {
-      const response = await axios.get('http://localhost:8000/api/v1/athletes/me/timeline', {
+      const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+      const response = await axios.get(`${API_URL}/athletes/me/timeline`, {
         headers: {
           'X-Session-ID': sessionId,
           // 'Authorization': `Bearer ${token}` // TODO: handle JWT token automatically if logged in

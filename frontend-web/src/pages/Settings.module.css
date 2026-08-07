@@ -15,7 +15,7 @@
 }
 
 .subtitle {
-  color: var(--secondary-color);
+  color: var(--text-muted);
   font-size: 0.95rem;
 }
 
@@ -56,7 +56,7 @@
 }
 
 .helpText {
-  color: var(--secondary-color);
+  color: var(--text-muted);
   font-size: 0.9rem;
   margin-top: -10px;
   margin-bottom: 10px;

@@ -24,7 +24,7 @@ describe('authService', () => {
     
     const result = await authService.verifyOtp('771234567', '0000')
     expect(result.access_token).toBe('123')
-    expect(api.post).toHaveBeenCalled()
+    expect(api.post).toHaveBeenCalledWith('/auth/verify', { phone_number: '771234567', code: '0000' })
   })
 
   it('devrait récupérer le profil', async () => {

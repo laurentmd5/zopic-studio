@@ -9,7 +9,7 @@ from datetime import datetime, timezone, timedelta
 
 @pytest.mark.asyncio
 async def test_create_archive_no_order(async_client, db_session):
-    response = await async_client.post("/orders/999/archives")
+    response = await async_client.post("/api/v1/orders/999/archives")
     assert response.status_code == 404
 
 @pytest.mark.asyncio
@@ -18,7 +18,7 @@ async def test_create_archive_no_permission(async_client, db_session):
     db_session.add(order)
     await db_session.commit()
     
-    response = await async_client.post(f"/orders/{order.id}/archives")
+    response = await async_client.post(f"/api/v1/orders/{order.id}/archives")
     assert response.status_code == 403
 
 @pytest.mark.asyncio
@@ -31,7 +31,7 @@ async def test_create_archive_expired_permission(async_client, db_session):
     db_session.add(perm)
     await db_session.commit()
     
-    response = await async_client.post(f"/orders/{order.id}/archives")
+    response = await async_client.post(f"/api/v1/orders/{order.id}/archives")
     assert response.status_code == 403
 
 @pytest.mark.asyncio
@@ -47,7 +47,7 @@ async def test_create_archive_existing_processing(async_client, db_session):
     db_session.add(archive)
     await db_session.commit()
     
-    response = await async_client.post(f"/orders/{order.id}/archives")
+    response = await async_client.post(f"/api/v1/orders/{order.id}/archives")
     assert response.status_code == 200
     assert response.json()["status"] == "PROCESSING"
 
@@ -72,7 +72,7 @@ async def test_create_archive_new(async_client, db_session):
         mock_redis = AsyncMock()
         mock_pool.return_value = mock_redis
         
-        response = await async_client.post(f"/orders/{order.id}/archives")
+        response = await async_client.post(f"/api/v1/orders/{order.id}/archives")
         assert response.status_code == 200
         assert response.json()["status"] == "PROCESSING"
         mock_redis.enqueue_job.assert_called_once()
@@ -94,13 +94,14 @@ async def test_create_archive_recreate_failed(async_client, db_session):
         mock_redis = AsyncMock()
         mock_pool.return_value = mock_redis
         
-        response = await async_client.post(f"/orders/{order.id}/archives")
+        response = await async_client.post(f"/api/v1/orders/{order.id}/archives")
         assert response.status_code == 200
         mock_redis.enqueue_job.assert_called_once()
 
 @pytest.mark.asyncio
 async def test_archive_callback_not_found(async_client):
-    response = await async_client.post("/orders/1/archives/999/callback", json={"status": "COMPLETED"})
+    from app.core.config import settings
+    response = await async_client.post(f"/api/v1/orders/1/archives/999/callback?secret={settings.SECRET_KEY}", json={"status": "COMPLETED"})
     assert response.status_code == 404
 
 @pytest.mark.asyncio
@@ -109,8 +110,9 @@ async def test_archive_callback_success(async_client, db_session):
     db_session.add(archive)
     await db_session.commit()
     
+    from app.core.config import settings
     response = await async_client.post(
-        f"/orders/1/archives/{archive.id}/callback", 
+        f"/api/v1/orders/1/archives/{archive.id}/callback?secret={settings.SECRET_KEY}", 
         json={"status": "COMPLETED", "s3_object_key": "new.zip", "size": 2048}
     )
     assert response.status_code == 200

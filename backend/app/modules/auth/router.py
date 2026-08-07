@@ -9,15 +9,21 @@ from app.modules.auth.models import User, PhotographerProfile
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
+from fastapi import Request
+from app.core.limiter import limiter
+
 @router.post("/request-otp")
-async def request_otp(data: OTPRequest, db: AsyncSession = Depends(get_db)):
+@limiter.limit("3/minute")
+async def request_otp(request: Request, data: OTPRequest, db: AsyncSession = Depends(get_db)):
     await service.generate_and_send_otp(db, data.phone_number)
     return {"message": "OTP sent successfully"}
 
 from fastapi import Header
 
 @router.post("/verify")
+@limiter.limit("5/minute")
 async def verify_otp(
+    request: Request,
     data: OTPVerify, 
     x_session_id: str | None = Header(None),
     db: AsyncSession = Depends(get_db)
@@ -36,6 +42,13 @@ async def verify_otp(
         await merge_guest_orders(db, result["user_id"], x_session_id)
         
     return Token(**result)
+
+@router.post("/refresh")
+async def refresh_token(
+    refresh_token: str,
+    db: AsyncSession = Depends(get_db)
+) -> Token:
+    return await service.refresh_access_token(db, refresh_token)
 
 @router.get("/me", response_model=UserResponse)
 async def get_me(current_user: User = Depends(service.get_current_user), db: AsyncSession = Depends(get_db)):

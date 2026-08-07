@@ -1,5 +1,5 @@
 import enum
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, Enum as SQLEnum
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 from app.core.database import Base
@@ -18,7 +18,7 @@ class Order(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True) # Nullable for guest checkout
     session_id = Column(String, index=True, nullable=True) # For guest sessions
     total_amount = Column(Integer, nullable=False) # En FCFA
-    status = Column(String, default=OrderStatus.PENDING)
+    status = Column(SQLEnum(OrderStatus), default=OrderStatus.PENDING)
     paydunya_token = Column(String, unique=True, nullable=True)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
@@ -30,8 +30,8 @@ class OrderItem(Base):
     __tablename__ = "order_items"
 
     id = Column(Integer, primary_key=True, index=True)
-    order_id = Column(Integer, ForeignKey("orders.id"), nullable=False)
-    photo_id = Column(Integer, ForeignKey("photos.id"), nullable=False)
+    order_id = Column(Integer, ForeignKey("orders.id"), nullable=False, index=True)
+    photo_id = Column(Integer, ForeignKey("photos.id"), nullable=False, index=True)
     price = Column(Integer, nullable=False)
 
     order = relationship("Order", back_populates="items")

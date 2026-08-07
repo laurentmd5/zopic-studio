@@ -34,3 +34,11 @@ class OTPCode(Base):
     code = Column(String, nullable=False)
     expires_at = Column(DateTime, nullable=False)
     is_used = Column(Boolean, default=False)
+    failed_attempts = Column(Integer, default=0)
+    is_locked = Column(Boolean, default=False)
+
+class TokenBlacklist(Base):
+    __tablename__ = "token_blacklist"
+    id = Column(Integer, primary_key=True, index=True)
+    jti = Column(String, unique=True, index=True, nullable=False)
+    expires_at = Column(DateTime, nullable=False)

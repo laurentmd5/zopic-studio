@@ -31,7 +31,7 @@ async def test_engine():
 
 @pytest_asyncio.fixture(scope="function")
 async def db_session(test_engine):
-    # RecrÃƒÂ©er les tables pour chaque test
+    # Recréer les tables pour chaque test
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
@@ -42,7 +42,7 @@ async def db_session(test_engine):
     async with TestingSessionLocal() as session:
         yield session
     
-    # Nettoyer aprÃƒÂ¨s chaque test
+    # Nettoyer aprà¨s chaque test
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
 

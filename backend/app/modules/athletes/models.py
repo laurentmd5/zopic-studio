@@ -27,7 +27,7 @@ class AthleteProfile(Base):
     birth_date = Column(Date, nullable=True)
     
     # JSON to store dynamic sport attributes without schema changes
-    sport_attributes = Column(JSON, nullable=True, default={})
+    sport_attributes = Column(JSON, nullable=True, default=dict)
     
     profile_photo_url = Column(String, nullable=True)
     cover_photo_url = Column(String, nullable=True)

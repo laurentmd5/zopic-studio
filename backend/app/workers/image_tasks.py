@@ -5,10 +5,13 @@ from sqlalchemy import update
 from app.infrastructure.s3_client import s3_client
 from app.modules.competitions.models import Photo, PhotoStatus, Epreuve, Competition
 from app.core.config import settings
+import logging
+
+logger = logging.getLogger(__name__)
 
 async def generate_watermark(ctx, photo_id: int, original_key: str, watermark_key: str):
     """
-    TÃƒÂ¢che asynchrone Arq pour gÃƒÂ©nÃƒÂ©rer un filigrane.
+    Tà¢che asynchrone Arq pour générer un filigrane.
     """
     try:
         # 1. Download original image
@@ -39,7 +42,7 @@ async def generate_watermark(ctx, photo_id: int, original_key: str, watermark_ke
             if full_name:
                 photographer_name = full_name
         
-        text = f"AperÃ§u â€” ZoPic Studio | {photographer_name}"
+        text = f"Aperçu â€” ZoPic Studio | {photographer_name}"
         
         # Simple watermark top-left (MVP)
         draw.text((20, 20), text, fill=(255, 255, 255, 180))
@@ -69,7 +72,7 @@ async def generate_watermark(ctx, photo_id: int, original_key: str, watermark_ke
         await engine.dispose()
         return True
     except Exception as e:
-        print(f"Error processing watermark for photo {photo_id}: {e}")
+        logger.error(f"Error processing watermark for photo {photo_id}", exc_info=True)
         engine = create_async_engine(settings.DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://") if settings.DATABASE_URL.startswith("postgresql://") else settings.DATABASE_URL)
         async_session = async_sessionmaker(engine, expire_on_commit=False)
         async with async_session() as session:
