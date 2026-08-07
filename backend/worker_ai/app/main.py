@@ -8,6 +8,7 @@ app = FastAPI(title="ZoPic Studio - AI Worker API")
 
 QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
 AI_INTERNAL_TOKEN = os.getenv("AI_INTERNAL_TOKEN", "changeme")
+FACE_MATCH_THRESHOLD = float(os.getenv("FACE_MATCH_THRESHOLD", "0.85"))
 
 async def verify_token(ai_internal_token: str = Header(..., alias="X-AI-Internal-Token")):
     if ai_internal_token != AI_INTERNAL_TOKEN:
@@ -49,7 +50,7 @@ async def search_faces(
             collection_name=collection_name,
             query_vector=main_face_embedding,
             limit=20, # On renvoie les 20 meilleures correspondances
-            score_threshold=0.85 # Seuil de similarité (Cosine)
+            score_threshold=FACE_MATCH_THRESHOLD # Seuil de similarité (Cosine)
         )
         
         # Format the response
@@ -94,7 +95,7 @@ async def forget_faces(
             collection_name=collection_name,
             query_vector=main_face_embedding,
             limit=1000,
-            score_threshold=0.85
+            score_threshold=FACE_MATCH_THRESHOLD
         )
         
         point_ids = [hit.id for hit in search_result]

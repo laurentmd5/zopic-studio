@@ -45,6 +45,7 @@ PAYMENT_WEBHOOK_SECRET="changez-ce-secret-en-prod" # Pour valider la signature (
 ```env
 QDRANT_URL=http://localhost:6333
 QDRANT_API_KEY= # Optionnel en local
+FACE_MATCH_THRESHOLD=0.85 # Seuil de similarité pour la reconnaissance faciale (Cosine)
 ```
 
 > [!CAUTION]
