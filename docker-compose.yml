@@ -62,7 +62,7 @@ services:
       - ./backend/.env
     environment:
       - AI_API_URL=http://ai-api:8001
-      - AI_INTERNAL_TOKEN=${AI_INTERNAL_TOKEN:-changeme}
+      - AI_INTERNAL_TOKEN=${AI_INTERNAL_TOKEN:?AI_INTERNAL_TOKEN est requis en production}
 
   ai-api:
     image: zopic-ai-api:${DOCKER_IMAGE_TAG:-latest}
@@ -73,7 +73,7 @@ services:
       - minio
       - qdrant
     environment:
-      - AI_INTERNAL_TOKEN=${AI_INTERNAL_TOKEN:-changeme}
+      - AI_INTERNAL_TOKEN=${AI_INTERNAL_TOKEN:?AI_INTERNAL_TOKEN est requis en production}
       - REDIS_URL=redis://redis:6379/0
       - QDRANT_URL=http://qdrant:6333
       - S3_ENDPOINT_URL=http://minio:9000
@@ -91,7 +91,7 @@ services:
       - minio
       - qdrant
     environment:
-      - AI_INTERNAL_TOKEN=${AI_INTERNAL_TOKEN:-changeme}
+      - AI_INTERNAL_TOKEN=${AI_INTERNAL_TOKEN:?AI_INTERNAL_TOKEN est requis en production}
       - REDIS_URL=redis://redis:6379/0
       - QDRANT_URL=http://qdrant:6333
       - S3_ENDPOINT_URL=http://minio:9000

@@ -3,6 +3,11 @@ from typing import List, Optional, Any, Dict
 from datetime import date
 
 # Base Models
+class AthleteSportAttributes(BaseModel):
+    height_cm: Optional[int] = Field(None, ge=100, le=250)
+    weight_kg: Optional[float] = Field(None, ge=30, le=200)
+    position: Optional[str] = None
+    dominant_side: Optional[str] = None
 class CompetitionTimelineItem(BaseModel):
     id: str | int
     name: str
@@ -59,7 +64,7 @@ class AthleteProfileUpdate(BaseModel):
     club: Optional[str] = None
     nationality: Optional[str] = None
     birth_date: Optional[date] = None
-    sport_attributes: Optional[Dict[str, Any]] = None
+    sport_attributes: Optional[AthleteSportAttributes] = None
     theme_color: Optional[str] = None
     profile_photo_url: Optional[str] = None
     cover_photo_url: Optional[str] = None
@@ -85,7 +90,7 @@ class PublicAthleteProfileResponse(BaseModel):
     club: Optional[str]
     nationality: Optional[str]
     birth_date: Optional[date]
-    sport_attributes: Dict[str, Any]
+    sport_attributes: Optional[AthleteSportAttributes] = None
     theme_color: str
     is_verified: bool
     profile_photo_url: Optional[str]
